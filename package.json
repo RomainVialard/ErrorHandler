@@ -1,0 +1,23 @@
+{
+	"name": "@scriptaddicts/gas-error-handler",
+	"version": "1.0.0",
+	"description": "Methods to handle error in GAS",
+	"author": {
+		"name": "Romain Vialard",
+		"email": "romain.vialard@gmail.com"
+	},
+	"contributors": [
+		{
+			"name": "Jean-Rémi Delteil",
+			"email": "jeanremi.delteil@gmail.com"
+		}
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/RomainVialard/ErrorHandler.git"
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"gas-lib": "latest"
+	}
+}
