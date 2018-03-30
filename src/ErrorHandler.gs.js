@@ -106,6 +106,24 @@ function expBackoff(func) {
 }
 
 /**
+ * Helper function to automatically handles exponential backoff on UrlFetch use
+ *
+ * @param {string} url
+ * @param {Object} params
+ * 
+ * @return {UrlFetchApp.HTTPResponse}  - fetch response
+ */
+function expBackOffFetch(url, params) {
+  params = params || {};
+  
+  params.muteHttpExceptions = true;
+  
+  return ErrorHandler.expBackoff(function(){
+    return UrlFetchApp.fetch(url, params);
+  });
+}
+
+/**
  * If we simply log the error object, only the error message will be submitted to Stackdriver Logging
  * Best to re-write the error as a new object to get lineNumber & stack trace
  * 
@@ -163,6 +181,7 @@ function logError(e, additionalParams) {
 this['ErrorHandler'] = {
   // Add local alias to run the library as normal code
   expBackoff: expBackoff,
+  expBackOffFetch: expBackOffFetch,
   logError: logError
 };
 
