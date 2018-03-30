@@ -112,12 +112,12 @@ function logError(e, additionalParams) {
       lineNumber: e.lineNumber,
       filePath: e.fileName
     };
-  
+    
     var addonName = additionalParams && additionalParams.addonName || undefined;
     
-    var {stack, lastFunctionName} = ErrorHandler_._convertErrorStack(e.stack, addonName);
-    log.context.reportLocation.functionName = lastFunctionName;
-    log.message+= '\n    '+ stack;
+    var res = ErrorHandler_._convertErrorStack(e.stack, addonName);
+    log.context.reportLocation.functionName = res.lastFunctionName;
+    log.message+= '\n    '+ res.stack;
   }
   
   if (e.responseCode) {
