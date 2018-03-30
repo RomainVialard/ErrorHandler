@@ -11,7 +11,6 @@
  * _convertErrorStack()
  *****************************************************************/
 
-
 /**
  * Invokes a function, performing up to 5 retries with exponential backoff.
  * Retries with delays of approximately 1, 2, 4, 8 then 16 seconds for a total of
@@ -34,7 +33,28 @@
 function expBackoff(func) {
   for (var n = 0; n < 6; n++) {
     try {
-      return func();
+      var response = func();
+      
+      // Handle retries on UrlFetch calls with muteHttpExceptions
+      if (response && typeof response.getResponseCode === "function") {
+        var responseCode = response.getResponseCode();
+        
+        // Only perform retries on error 500 for now
+        if (responseCode == 500) {
+          if (n === 5) {
+            ErrorHandler.logError(new Error(response.getContentText()), {
+              shouldInvestigate: true,
+              failedAfter5Retries: true,
+              urlFetchWithMuteHttpExceptions: true,
+              context: "Exponential Backoff"
+            });
+            return response;
+          }
+          Utilities.sleep((Math.pow(2, n) * 1000) + (Math.round(Math.random() * 1000)));
+          continue;
+        }
+      }
+      return response;
     }
     catch(e) {
       if (e.message) {
@@ -60,6 +80,7 @@ function expBackoff(func) {
         // 'User-rate limit exceeded' is always followed by 'Retry after' + timestamp
         // Maybe we should parse the timestamp to check how long we need to wait 
         // and if we should abort or not
+        // 'User Rate Limit Exceeded' (without '-') isn't followed by 'Retry after' and it makes sense to retry
         if (e.message && e.message.indexOf('User-rate limit exceeded') !== -1) {
           ErrorHandler.logError(e, {
             shouldInvestigate: true,
