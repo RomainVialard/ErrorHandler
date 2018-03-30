@@ -8,3 +8,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 <!-- Add new, unreleased changes here. -->
 * none
+
+## [1.0.0] - 2018-03-30
+* Initial npm version
