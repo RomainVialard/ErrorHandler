@@ -54,7 +54,7 @@ function expBackoff(func) {
     
     
     // Handle retries on UrlFetch calls with muteHttpExceptions
-    if (noError && typeof response.getResponseCode === "function") {
+    if (noError && response && typeof response.getResponseCode === "function") {
       isUrlFetchResponse = true;
       
       var responseCode = response.getResponseCode();
