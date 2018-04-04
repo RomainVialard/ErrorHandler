@@ -1,6 +1,6 @@
 {
 	"name": "@scriptaddicts/gas-error-handler",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"description": "Methods to handle error in GAS",
 	"author": {
 		"name": "Romain Vialard",
