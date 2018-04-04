@@ -6,6 +6,7 @@
  * And makes sure that caught errors are correctly logged in Stackdriver
  *
  * expBackoff()
+ * urlFetchWithExpBackOff()
  * logError()
  *
  * _convertErrorStack()
@@ -139,7 +140,7 @@ function expBackoff(func) {
  * 
  * @return {UrlFetchApp.HTTPResponse}  - fetch response
  */
-function expBackOffFetch(url, params) {
+function urlFetchWithExpBackOff(url, params) {
   params = params || {};
   
   params.muteHttpExceptions = true;
@@ -207,7 +208,7 @@ function logError(e, additionalParams) {
 this['ErrorHandler'] = {
   // Add local alias to run the library as normal code
   expBackoff: expBackoff,
-  expBackOffFetch: expBackOffFetch,
+  urlFetchWithExpBackOff: urlFetchWithExpBackOff,
   logError: logError
 };
 
