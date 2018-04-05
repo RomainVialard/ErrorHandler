@@ -17,9 +17,13 @@ Things are different for Google Apps Script [advanced services](https://develope
 
 #### Example
 
+```JS
+
 // Calls an anonymous function that gets the subject of the vacation responder in Gmail for the currently authenticated user.
 
  var responseSubject = ErrorHandler.expBackoff(function(){return Gmail.Users.Settings.getVacation("me").responseSubject;});
+
+```
 
 
 #### Parameters
@@ -59,7 +63,7 @@ It simply wraps the fetch() call in an Exponential backoff logic.
 
 We advise to replace all existing calls to UrlFetchApp.fetch() by this new method.
 
-UrlFetchApp.fetch(url, params) => ErrorHandler.urlFetchWithExpBackOff(url, params)
+`UrlFetchApp.fetch(url, params) => ErrorHandler.urlFetchWithExpBackOff(url, params)`
 
 
 ### logError(e, additionalParams)
@@ -71,11 +75,11 @@ You can copy the code of this library in your own Google Apps Script project or 
 
 To install it as a library, use the following script ID and select the latest version:
 
-1mpYgNprGHnJW0BSPclqNIIErVaTyXQ7AjdmLaaE5O9s9bAOrsY14PMCy
+`1mpYgNprGHnJW0BSPclqNIIErVaTyXQ7AjdmLaaE5O9s9bAOrsY14PMCy`
 
 To copy the code in your project, simply copy-past the content of this file in a new script file in your project:
 
-https://github.com/RomainVialard/ErrorHandler/blob/master/src/ErrorHandler.gs.js 
+`https://github.com/RomainVialard/ErrorHandler/blob/master/src/ErrorHandler.gs.js`
 
 NPM install:
 
