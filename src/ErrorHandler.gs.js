@@ -212,10 +212,13 @@ this['ErrorHandler'] = {
   logError: logError
 };
 
-
 //<editor-fold desc="# Private methods">
 
 var ErrorHandler_ = {};
+
+// Get GAS global object: top-level this
+// noinspection ThisExpressionReferencesGlobalObjectJS
+ErrorHandler_._this = this;
 
 /**
  * Format stack:
@@ -232,7 +235,7 @@ var ErrorHandler_ = {};
 ErrorHandler_._convertErrorStack = function (stack, addonName) {
   // allow to use a global variable instead of passing the addonName in each call
   // noinspection JSUnresolvedVariable
-  addonName = addonName || SCRIPT_PROJECT_TITLE || '';
+  addonName = addonName || ErrorHandler_._this['SCRIPT_PROJECT_TITLE'] || '';
   
   var formattedStack = [];
   var lastFunctionName = '';
