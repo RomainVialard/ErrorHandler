@@ -215,6 +215,9 @@ this['ErrorHandler'] = {
 //<editor-fold desc="# Private methods">
 
 var ErrorHandler_ = {};
+
+// Get GAS global object: top-level this
+// noinspection ThisExpressionReferencesGlobalObjectJS
 ErrorHandler_._this = this;
 
 /**
