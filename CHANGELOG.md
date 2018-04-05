@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- Add new, unreleased changes here. -->
 * none
 
+## [1.1.2] - 2018-04-05
+* Fix issue for global Add-on name reference error
+
 ## [1.1.1] - 2018-04-05
 * Fix issue where response is undefined
 
