@@ -61,12 +61,44 @@ This method works exactly like the [fetch()](https://developers.google.com/apps-
 
 It simply wraps the fetch() call in an Exponential backoff logic.
 
-We advise to replace all existing calls to UrlFetchApp.fetch() by this new method.
+We advise to replace all existing calls to `UrlFetchApp.fetch()` by this new method.
 
-`UrlFetchApp.fetch(url, params) => ErrorHandler.urlFetchWithExpBackOff(url, params)`
+`UrlFetchApp.fetch(url, params)` => `ErrorHandler.urlFetchWithExpBackOff(url, params)`
 
 
 ### logError(e, additionalParams)
+
+When exception logging is enabled, unhandled exceptions are automatically sent to Stackdriver Logging with a stack trace ([see official documentation](https://developers.google.com/apps-script/guides/logging#exception_logging)).
+
+But if you wrap your code in a try...catch statement and use `console.error(error)` to send the exception to Stackdriver Logging, only the error message will be logged and not the stack trace.
+
+We advise to replace all existing calls to `console.error(error)` by this new method to correctly log the stack trace, in the exact same format used for unhandled exceptions.
+
+`console.error(error)` => `ErrorHandler.logError(error)`
+
+
+#### Parameters
+
+
+<table>
+  <tr>
+   <td>Name
+   </td>
+   <td>Type
+   </td>
+   <td>Description
+   </td>
+  </tr>
+  <tr>
+   <td>e
+   </td>
+   <td>String || Error || {lineNumber: number, fileName: string, responseCode: string}
+   </td>
+   <td>A standard error object retrieved in a try...catch statement or created with new Error() or a simple error message or an object
+   </td>
+  </tr>
+</table>
+
 
 
 ## Setup
