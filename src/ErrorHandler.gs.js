@@ -203,18 +203,33 @@ function logError(e, additionalParams) {
   console.error(log);
 }
 
+var ErrorHandler_ = {};
+ErrorHandler_._err1 = "Conditional format rule cannot reference a different sheet.";
+ErrorHandler_._err2 = "Invalid email";
+
+var errorMessageTranslations = {
+  // "Conditional format rule cannot reference a different sheet."
+  "Quy tắc định dạng có điều kiện không thể tham chiếu một trang tính khác.": ErrorHandler_._err1,
+  "La regla de formato condicional no puede hacer referencia a una hoja diferente.": ErrorHandler_._err1,
+  "La regola di formattazione condizionale non può contenere un riferimento a un altro foglio.": ErrorHandler_._err1,
+  "La règle de mise en forme conditionnelle ne doit pas faire référence à une autre feuille.": ErrorHandler_._err1,
+  "Die Regel für eine bedingte Formatierung darf sich nicht auf ein anderes Tabellenblatt beziehen.": ErrorHandler_._err1,
+  "Правило условного форматирования не может ссылаться на другой лист.": ErrorHandler_._err1,
+  // "Invalid email"
+  "E-mail incorrect": ErrorHandler_._err2,
+  "E-mail inválido": ErrorHandler_._err2
+};
 
 // noinspection JSUnusedGlobalSymbols, ThisExpressionReferencesGlobalObjectJS
 this['ErrorHandler'] = {
   // Add local alias to run the library as normal code
   expBackoff: expBackoff,
   urlFetchWithExpBackOff: urlFetchWithExpBackOff,
-  logError: logError
+  logError: logError,
+  errorMessageTranslations: errorMessageTranslations
 };
 
 //<editor-fold desc="# Private methods">
-
-var ErrorHandler_ = {};
 
 // Get GAS global object: top-level this
 // noinspection ThisExpressionReferencesGlobalObjectJS
