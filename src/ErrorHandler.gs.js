@@ -160,17 +160,24 @@ function urlFetchWithExpBackOff(url, params) {
 function logError(e, additionalParams) {
   e = (typeof e === 'string') ? new Error(e) : e;
   
+  // Localize error message
+  var normalizedMessage = ErrorHandler.getNormalizedError(e.message);
+  var message = normalizedMessage === ErrorHandler.NORMALIZED_ERROR.UNKNOWN_ERROR ? e.message : normalizedMessage;
+  
   var log = {
-    context: {}
+    context: {
+      locale: Session.getActiveUserLocale(),
+      originalMessage: e.message
+    }
   };
   
   if (e.name) {
     // examples of error name: Error, ReferenceError, Exception, GoogleJsonResponseException
     // would be nice to categorize
     log.context.errorName = e.name;
-    e.message = e.name +": "+ e.message;
+    message = e.name +": "+ message;
   }
-  log.message = e.message;
+  log.message = message;
   
   // Manage error Stack
   if (e.lineNumber && e.fileName && e.stack) {
@@ -203,22 +210,44 @@ function logError(e, additionalParams) {
   console.error(log);
 }
 
-var ErrorHandler_ = {};
-ErrorHandler_._err1 = "Conditional format rule cannot reference a different sheet.";
-ErrorHandler_._err2 = "Invalid email";
 
-var errorMessageTranslations = {
-  // "Conditional format rule cannot reference a different sheet."
-  "Quy tắc định dạng có điều kiện không thể tham chiếu một trang tính khác.": ErrorHandler_._err1,
-  "La regla de formato condicional no puede hacer referencia a una hoja diferente.": ErrorHandler_._err1,
-  "La regola di formattazione condizionale non può contenere un riferimento a un altro foglio.": ErrorHandler_._err1,
-  "La règle de mise en forme conditionnelle ne doit pas faire référence à une autre feuille.": ErrorHandler_._err1,
-  "Die Regel für eine bedingte Formatierung darf sich nicht auf ein anderes Tabellenblatt beziehen.": ErrorHandler_._err1,
-  "Правило условного форматирования не может ссылаться на другой лист.": ErrorHandler_._err1,
-  // "Invalid email"
-  "E-mail incorrect": ErrorHandler_._err2,
-  "E-mail inválido": ErrorHandler_._err2
+/**
+ * Return the english version of the error if listed in this library
+ * 
+ * @type {string} localizedErrorMessage
+ * 
+ * @return {string | NORMALIZED_ERROR.UNKNOWN_ERROR} the error in English or UNKNOWN if no matching error was found
+ */
+function getNormalizedError(localizedErrorMessage) {
+  var error = ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS[localizedErrorMessage];
+  
+  if (!error) return ErrorHandler.NORMALIZED_ERROR.UNKNOWN_ERROR;
+  
+  return error.ref;
+}
+
+/**
+ * Try to find the locale of the localized thrown error
+ * 
+ * @type {string} localizedErrorMessage
+ * 
+ * @return {string | ''} return the locale or '' if no matching error found
+ */
+function getErrorLocale(localizedErrorMessage) {
+  var error = ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS[localizedErrorMessage];
+  
+  if (!error) return '';
+  
+  return error.locale;
+}
+
+NORMALIZED_ERROR = {
+  CONDITIONNAL_RULE_REFERENCE_DIF_SHEET: "Conditional format rule cannot reference a different sheet.",
+  INVALID_EMAIL: "Invalid email",
+  
+  UNKNOWN_ERROR: "Unknown or unlisted Error",
 };
+
 
 // noinspection JSUnusedGlobalSymbols, ThisExpressionReferencesGlobalObjectJS
 this['ErrorHandler'] = {
@@ -226,13 +255,21 @@ this['ErrorHandler'] = {
   expBackoff: expBackoff,
   urlFetchWithExpBackOff: urlFetchWithExpBackOff,
   logError: logError,
-  errorMessageTranslations: errorMessageTranslations
+  
+  getNormalizedError: getNormalizedError,
+  getErrorLocale: getErrorLocale,
+  NORMALIZED_ERROR: NORMALIZED_ERROR,
 };
 
 //<editor-fold desc="# Private methods">
 
-// Get GAS global object: top-level this
+var ErrorHandler_ = {};
+
+
 // noinspection ThisExpressionReferencesGlobalObjectJS
+/**
+ * Get GAS global object: top-level this
+ */
 ErrorHandler_._this = this;
 
 /**
@@ -270,5 +307,28 @@ ErrorHandler_._convertErrorStack = function (stack, addonName) {
     lastFunctionName: lastFunctionName
   };
 };
+
+
+// noinspection NonAsciiCharacters, JSNonASCIINames
+/**
+ * Map all different error translation to their english counterpart,
+ * Thanks to Google AppsScript throwing localized errors, it's impossible to easily catch them and actually do something to fix it for our users.
+ */
+ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
+  // "Conditional format rule cannot reference a different sheet."
+  "Conditional format rule cannot reference a different sheet.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'en'},
+  "Quy tắc định dạng có điều kiện không thể tham chiếu một trang tính khác.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'vi'},
+  "La regla de formato condicional no puede hacer referencia a una hoja diferente.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'es'},
+  "La regola di formattazione condizionale non può contenere un riferimento a un altro foglio.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'it'},
+  "La règle de mise en forme conditionnelle ne doit pas faire référence à une autre feuille.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'fr'},
+  "Die Regel für eine bedingte Formatierung darf sich nicht auf ein anderes Tabellenblatt beziehen.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'de'},
+  "Правило условного форматирования не может ссылаться на другой лист.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ru'},
+  
+  // "Invalid email"
+  "E-mail incorrect": { ref: NORMALIZED_ERROR.INVALID_EMAIL, locale: 'en'},
+  "E-mail inválido": { ref: NORMALIZED_ERROR.INVALID_EMAIL, locale: 'pt'},
+};
+
+
 
 //</editor-fold>
