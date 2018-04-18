@@ -155,22 +155,42 @@ function urlFetchWithExpBackOff(url, params) {
  * Best to re-write the error as a new object to get lineNumber & stack trace
  * 
  * @param {String || Error || {lineNumber: number, fileName: string, responseCode: string}} e
- * @param {Object || {addonName: string}} additionalParams
+ * @param {Object || {addonName: string}} [additionalParams]
  */
 function logError(e, additionalParams) {
   e = (typeof e === 'string') ? new Error(e) : e;
   
   // Localize error message
-  var normalizedMessage = ErrorHandler.getNormalizedError(e.message);
+  var partialMatches = [];
+  var normalizedMessage = ErrorHandler.getNormalizedError(e.message, partialMatches);
   var message = normalizedMessage || e.message;
+  
+  var locale;
+  try {
+    locale = Session.getActiveUserLocale();
+  }
+  catch(err) {
+    // Try to add the locale
+    locale = ErrorHandler.getErrorLocale(e.message);
+  }
   
   var log = {
     context: {
-      locale: Session.getActiveUserLocale(),
+      locale: locale || '',
       originalMessage: e.message,
       translated: !!normalizedMessage,
     }
   };
+  
+  
+  // Add partialMatches if any
+  if (partialMatches.length) {
+    log.context.variables = {};
+    
+    partialMatches.forEach(function (match) {
+      log.context.variables[match.variable] = match.value;
+    });
+  }
   
   if (e.name) {
     // examples of error name: Error, ReferenceError, Exception, GoogleJsonResponseException
@@ -216,13 +236,48 @@ function logError(e, additionalParams) {
  * Return the english version of the error if listed in this library
  * 
  * @type {string} localizedErrorMessage
+ * @type {Array<{
+ *   variable: string,
+ *   value: string
+ * }>} partialMatches - Pass an empty array, getNormalizedError() will populate it with found extracted variables in case of a partial match
  * 
- * @return {string | ''} the error in English or '' if no matching error was found
+ * @return {ErrorHandler_.NORMALIZED_ERROR | ''} the error in English or '' if no matching error was found
  */
-function getNormalizedError(localizedErrorMessage) {
+function getNormalizedError(localizedErrorMessage, partialMatches) {
+  /**
+   * @type {ErrorHandler_.ErrorMatcher}
+   */
   var error = ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS[localizedErrorMessage];
   
-  return error && error.ref || '';
+  if (error) return error.ref;
+  if (typeof localizedErrorMessage !== 'string') return '';
+  
+  // No exact match, try to execute a partial match
+  var match;
+  
+  /**
+   * @type {ErrorHandler_.PartialMatcher}
+   */
+  var matcher;
+  
+  for (var i = 0; matcher = ErrorHandler_._ERROR_PARTIAL_MATCH[i]; i++) {
+    // search for a match
+    match = localizedErrorMessage.match(matcher.regex);
+    if (match) break;
+  }
+  
+  // No match found
+  if (!match) return '';
+  
+  // Extract partial match variables
+  for (var j = 0, variable; variable = matcher.variables[j] ; j++) {
+    partialMatches.push({
+      variable: variable,
+      value: match[j+1] !== undefined && match[j+1] || ''
+    });
+  }
+  
+  return matcher.ref;
 }
 
 /**
@@ -233,17 +288,49 @@ function getNormalizedError(localizedErrorMessage) {
  * @return {string | ''} return the locale or '' if no matching error found
  */
 function getErrorLocale(localizedErrorMessage) {
+  /**
+   * @type {ErrorHandler_.ErrorMatcher}
+   */
   var error = ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS[localizedErrorMessage];
   
-  return error && error.locale || '';
+  if (error) return error.locale;
+  if (typeof localizedErrorMessage !== 'string') return '';
+  
+  // No exact match, try to execute a partial match
+  var match;
+  
+  /**
+   * @type {ErrorHandler_.PartialMatcher}
+   */
+  var matcher;
+  
+  for (var i = 0; matcher = ErrorHandler_._ERROR_PARTIAL_MATCH[i]; i++) {
+    // search for a match
+    match = localizedErrorMessage.match(matcher.regex);
+    if (match) break;
+  }
+  
+  // No match found
+  if (!match) return '';
+  
+  return matcher.locale;
 }
 
+/**
+ * @typedef {string} ErrorHandler_.NORMALIZED_ERROR
+ */
+/**
+ * @type {Object<ErrorHandler_.NORMALIZED_ERROR>}
+ */
 NORMALIZED_ERROR = {
   CONDITIONNAL_RULE_REFERENCE_DIF_SHEET: "Conditional format rule cannot reference a different sheet.",
   SERVER_ERROR_RETRY_LATER: "We're sorry, a server error occurred. Please wait a bit and try again.",
   EMPTY_RESPONSE: "Empty response",
   LIMIT_EXCEEDED: "Limit Exceeded: .",
   SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL: "Service invoked too many times for one day: email.",
+  
+  // Partial match error
+  INVALID_EMAIL: 'Invalid email',
 };
 
 
@@ -311,6 +398,8 @@ ErrorHandler_._convertErrorStack = function (stack, addonName) {
 /**
  * Map all different error translation to their english counterpart,
  * Thanks to Google AppsScript throwing localized errors, it's impossible to easily catch them and actually do something to fix it for our users.
+ * 
+ * @type {Object<ErrorHandler_.ErrorMatcher>}
  */
 ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // "Conditional format rule cannot reference a different sheet."
@@ -354,6 +443,30 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   
 };
 
+/**
+ * @type {Array<ErrorHandler_.PartialMatcher>}
+ */
+ErrorHandler_._ERROR_PARTIAL_MATCH = [
+  {regex: /^Invalid email: (.*)$/,
+    variables: ['email'],
+    ref: NORMALIZED_ERROR.INVALID_EMAIL,
+    locale: 'en'},
+];
+
+/**
+ * @typedef {{}} ErrorHandler_.PartialMatcher
+ * 
+ * @property {RegExp} regex - Regex describing the error
+ * @property {Array<string>} variables - Ordered list naming the successive extracted value by the regex groups
+ * @property {ErrorHandler_.NORMALIZED_ERROR} ref - Error reference
+ * @property {string} locale - Error locale
+ */
+/**
+ * @typedef {{}} ErrorHandler_.ErrorMatcher
+ * 
+ * @property {ErrorHandler_.NORMALIZED_ERROR} ref - Error reference
+ * @property {string} locale - Error locale
+ */
 
 
 //</editor-fold>
