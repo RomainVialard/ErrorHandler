@@ -240,7 +240,10 @@ function getErrorLocale(localizedErrorMessage) {
 
 NORMALIZED_ERROR = {
   CONDITIONNAL_RULE_REFERENCE_DIF_SHEET: "Conditional format rule cannot reference a different sheet.",
-  INVALID_EMAIL: "Invalid email",
+  SERVER_ERROR_RETRY_LATER: "We're sorry, a server error occurred. Please wait a bit and try again.",
+  EMPTY_RESPONSE: "Empty response",
+  LIMIT_EXCEEDED: "Limit Exceeded: .",
+  SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL: "Service invoked too many times for one day: email.",
 };
 
 
@@ -319,9 +322,36 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Die Regel für eine bedingte Formatierung darf sich nicht auf ein anderes Tabellenblatt beziehen.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'de'},
   "Правило условного форматирования не может ссылаться на другой лист.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ru'},
   
-  // "Invalid email"
-  "E-mail incorrect": { ref: NORMALIZED_ERROR.INVALID_EMAIL, locale: 'en'},
-  "E-mail inválido": { ref: NORMALIZED_ERROR.INVALID_EMAIL, locale: 'pt'},
+  // "We're sorry, a server error occurred. Please wait a bit and try again."
+  "We're sorry, a server error occurred. Please wait a bit and try again.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'en'},
+  "Spiacenti. Si è verificato un errore del server. Attendi e riprova.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'it'},
+  "Une erreur est survenue sur le serveur. Nous vous prions de nous en excuser et vous invitons à réessayer ultérieurement.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'fr'},
+  "Xin lỗi bạn, máy chủ đã gặp lỗi. Vui lòng chờ một lát và thử lại.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'vi'},
+  "Lo sentimos, se ha producido un error en el servidor. Espera un momento y vuelve a intentarlo.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'es'},
+  "ขออภัย มีข้อผิดพลาดของเซิร์ฟเวอร์เกิดขึ้น โปรดรอสักครู่แล้วลองอีกครั้ง": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'th'},
+  "很抱歉，伺服器發生錯誤，請稍後再試。": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'zh_TW'},
+  "Infelizmente ocorreu um erro do servidor. Espere um momento e tente novamente.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'pt'},
+  
+  // "Empty response"
+  "Empty response": { ref: NORMALIZED_ERROR.EMPTY_RESPONSE, locale: 'en'},
+  "Respuesta vacía": { ref: NORMALIZED_ERROR.EMPTY_RESPONSE, locale: 'es'},
+  "Réponse vierge": { ref: NORMALIZED_ERROR.EMPTY_RESPONSE, locale: 'fr'},
+  "Câu trả lời trống": { ref: NORMALIZED_ERROR.EMPTY_RESPONSE, locale: 'vi'},
+  "Resposta vazia": { ref: NORMALIZED_ERROR.EMPTY_RESPONSE, locale: 'pt'},
+  "Prázdná odpověď": { ref: NORMALIZED_ERROR.EMPTY_RESPONSE, locale: 'cs'},
+  
+  // "Limit Exceeded: ."
+  "Limit Exceeded: .": { ref: NORMALIZED_ERROR.LIMIT_EXCEEDED, locale: 'en'},
+  "Límite excedido: .": { ref: NORMALIZED_ERROR.LIMIT_EXCEEDED, locale: 'es'},
+  "Limite dépassée : .": { ref: NORMALIZED_ERROR.LIMIT_EXCEEDED, locale: 'fr'},
+  
+  // "Service invoked too many times for one day: email."
+  "Service invoked too many times for one day: email.": { ref: NORMALIZED_ERROR.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'en'},
+  "Trop d'appels pour ce service aujourd'hui : email.": { ref: NORMALIZED_ERROR.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'fr'},
+  "Servicio solicitado demasiadas veces en un mismo día: gmail.": { ref: NORMALIZED_ERROR.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'es'},
+  "Serviço chamado muitas vezes no mesmo dia: email.": { ref: NORMALIZED_ERROR.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'pt'},
+  
+  
 };
 
 
