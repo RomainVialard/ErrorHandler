@@ -319,9 +319,6 @@ function getErrorLocale(localizedErrorMessage) {
 /**
  * @typedef {string} ErrorHandler_.NORMALIZED_ERROR
  */
-/**
- * @type {Object<ErrorHandler_.NORMALIZED_ERROR>}
- */
 NORMALIZED_ERROR = {
   CONDITIONNAL_RULE_REFERENCE_DIF_SHEET: "Conditional format rule cannot reference a different sheet.",
   SERVER_ERROR_RETRY_LATER: "We're sorry, a server error occurred. Please wait a bit and try again.",
