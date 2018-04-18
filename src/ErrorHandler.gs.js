@@ -162,12 +162,13 @@ function logError(e, additionalParams) {
   
   // Localize error message
   var normalizedMessage = ErrorHandler.getNormalizedError(e.message);
-  var message = normalizedMessage === ErrorHandler.NORMALIZED_ERROR.UNKNOWN_ERROR ? e.message : normalizedMessage;
+  var message = normalizedMessage || e.message;
   
   var log = {
     context: {
       locale: Session.getActiveUserLocale(),
-      originalMessage: e.message
+      originalMessage: e.message,
+      translated: !!normalizedMessage,
     }
   };
   
@@ -216,14 +217,12 @@ function logError(e, additionalParams) {
  * 
  * @type {string} localizedErrorMessage
  * 
- * @return {string | NORMALIZED_ERROR.UNKNOWN_ERROR} the error in English or UNKNOWN if no matching error was found
+ * @return {string | ''} the error in English or '' if no matching error was found
  */
 function getNormalizedError(localizedErrorMessage) {
   var error = ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS[localizedErrorMessage];
   
-  if (!error) return ErrorHandler.NORMALIZED_ERROR.UNKNOWN_ERROR;
-  
-  return error.ref;
+  return error && error.ref || '';
 }
 
 /**
@@ -236,16 +235,12 @@ function getNormalizedError(localizedErrorMessage) {
 function getErrorLocale(localizedErrorMessage) {
   var error = ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS[localizedErrorMessage];
   
-  if (!error) return '';
-  
-  return error.locale;
+  return error && error.locale || '';
 }
 
 NORMALIZED_ERROR = {
   CONDITIONNAL_RULE_REFERENCE_DIF_SHEET: "Conditional format rule cannot reference a different sheet.",
   INVALID_EMAIL: "Invalid email",
-  
-  UNKNOWN_ERROR: "Unknown or unlisted Error",
 };
 
 
