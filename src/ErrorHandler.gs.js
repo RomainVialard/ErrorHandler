@@ -335,6 +335,7 @@ NORMALIZED_ERROR = {
   // Partial match error
   INVALID_EMAIL: 'Invalid email',
   DOCUMENT_MISSING: 'Document is missing (perhaps it was deleted?)',
+  USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME: 'User-rate limit exceeded. Retry after specified time.',
 };
 
 
@@ -424,6 +425,11 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Ehdollinen muotoilusääntö ei voi viitata toiseen taulukkoon.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'fi'},
   "กฎการจัดรูปแบบตามเงื่อนไขอ้างอิงแผ่นงานอื่นไม่ได้": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'th'},
   "Reguła formatowania warunkowego nie może odwoływać się do innego arkusza.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'pl'},
+  "Aturan format bersyarat tidak dapat merujuk ke sheet yang berbeda.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'in'},
+  "Villkorsstyrd formateringsregel får inte referera till ett annat arbetsblad.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'sv'},
+  "La regla de format condicional no pot fer referència a un altre full.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ca'},
+  "A feltételes formázási szabály nem tud másik munkalapot meghívni.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'hu'},
+  "A regra de formatação condicional não pode fazer referência a uma página diferente.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'pt'},
   
   // "We're sorry, a server error occurred. Please wait a bit and try again."
   "We're sorry, a server error occurred. Please wait a bit and try again.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'en'},
@@ -435,6 +441,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "很抱歉，伺服器發生錯誤，請稍後再試。": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'zh_tw'},
   "Infelizmente ocorreu um erro do servidor. Espere um momento e tente novamente.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'pt'},
   "Sajnáljuk, szerverhiba történt. Kérjük, várjon egy kicsit, majd próbálkozzon újra.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'hu'},
+  "Ett serverfel uppstod. Vänta lite och försök igen.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'sv'},
   
   // "Empty response"
   "Empty response": { ref: NORMALIZED_ERROR.EMPTY_RESPONSE, locale: 'en'},
@@ -495,6 +502,13 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['docId'],
     ref: NORMALIZED_ERROR.DOCUMENT_MISSING,
     locale: 'it'},
+  
+  // User-rate limit exceeded. Retry after XXX
+  {regex: /^User-rate limit exceeded. Retry after (.*)$/,
+    variables: ['timestamp'],
+    ref: NORMALIZED_ERROR.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
+    locale: 'en'},
+  
 ];
 
 /**
