@@ -322,6 +322,7 @@ function getErrorLocale(localizedErrorMessage) {
 NORMALIZED_ERROR = {
   CONDITIONNAL_RULE_REFERENCE_DIF_SHEET: "Conditional format rule cannot reference a different sheet.",
   SERVER_ERROR_RETRY_LATER: "We're sorry, a server error occurred. Please wait a bit and try again.",
+  AUTHORIZATION_REQUIRED: "Authorization is required to perform that action. Please run the script again to authorize it.",
   EMPTY_RESPONSE: "Empty response",
   LIMIT_EXCEEDED: "Limit Exceeded: .",
   USER_RATE_LIMIT_EXCEEDED: "User Rate Limit Exceeded",
@@ -331,6 +332,7 @@ NORMALIZED_ERROR = {
   TRYING_TO_EDIT_PROTECTED_CELL: "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.",
   UNABLE_TO_TALK_TO_TRIGGER_SERVICE: "Unable to talk to trigger service",
   MAIL_SERVICE_NOT_ENABLED: "Mail service not enabled",
+  INVALID_THREAD_ID_VALUE: "Invalid thread_id value",
   
   // Partial match error
   INVALID_EMAIL: 'Invalid email',
@@ -430,6 +432,8 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "La regla de format condicional no pot fer referència a un altre full.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ca'},
   "A feltételes formázási szabály nem tud másik munkalapot meghívni.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'hu'},
   "A regra de formatação condicional não pode fazer referência a uma página diferente.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'pt'},
+  "Правило умовного форматування не може посилатися на інший аркуш.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'uk'},
+  "لا يمكن أن تشير الصيغة الشرطية إلى ورقة مختلفة.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ar_sa'},
   
   // "We're sorry, a server error occurred. Please wait a bit and try again."
   "We're sorry, a server error occurred. Please wait a bit and try again.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'en'},
@@ -442,6 +446,10 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Infelizmente ocorreu um erro do servidor. Espere um momento e tente novamente.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'pt'},
   "Sajnáljuk, szerverhiba történt. Kérjük, várjon egy kicsit, majd próbálkozzon újra.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'hu'},
   "Ett serverfel uppstod. Vänta lite och försök igen.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'sv'},
+  
+  // "Authorization is required to perform that action. Please run the script again to authorize it."
+  "Authorization is required to perform that action. Please run the script again to authorize it.": { ref: NORMALIZED_ERROR.AUTHORIZATION_REQUIRED, locale: 'en'},
+  "Cần được cho phép để thực hiện tác vụ đó. Hãy chạy lại tập lệnh để cho phép tác vụ.": { ref: NORMALIZED_ERROR.AUTHORIZATION_REQUIRED, locale: 'vi'},
   
   // "Empty response"
   "Empty response": { ref: NORMALIZED_ERROR.EMPTY_RESPONSE, locale: 'en'},
@@ -481,6 +489,9 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   
   // "Mail service not enabled"
   "Mail service not enabled": { ref: NORMALIZED_ERROR.MAIL_SERVICE_NOT_ENABLED, locale: 'en'},
+  
+  // "Invalid thread_id value"
+  "Invalid thread_id value": { ref: NORMALIZED_ERROR.INVALID_THREAD_ID_VALUE, locale: 'en'},
 };
 
 /**
