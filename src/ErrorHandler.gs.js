@@ -327,10 +327,17 @@ NORMALIZED_ERROR = {
   SERVER_ERROR_RETRY_LATER: "We're sorry, a server error occurred. Please wait a bit and try again.",
   EMPTY_RESPONSE: "Empty response",
   LIMIT_EXCEEDED: "Limit Exceeded: .",
+  USER_RATE_LIMIT_EXCEEDED: "User Rate Limit Exceeded",
+  NOT_FOUND: "Not Found",
+  BACKEND_ERROR: "Backend Error",
   SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL: "Service invoked too many times for one day: email.",
+  TRYING_TO_EDIT_PROTECTED_CELL: "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.",
+  UNABLE_TO_TALK_TO_TRIGGER_SERVICE: "Unable to talk to trigger service",
+  MAIL_SERVICE_NOT_ENABLED: "Mail service not enabled",
   
   // Partial match error
   INVALID_EMAIL: 'Invalid email',
+  DOCUMENT_MISSING: 'Document is missing (perhaps it was deleted?)',
 };
 
 
@@ -411,6 +418,15 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Die Regel für eine bedingte Formatierung darf sich nicht auf ein anderes Tabellenblatt beziehen.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'de'},
   "Правило условного форматирования не может ссылаться на другой лист.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ru'},
   "조건부 서식 규칙은 다른 시트를 참조할 수 없습니다.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ko'},
+  "條件式格式規則無法參照其他工作表。": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'zh_tw'},
+  "条件付き書式ルールで別のシートを参照することはできません。": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ja'},
+  "Pravidlo podmíněného formátu nemůže odkazovat na jiný list.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'cs'},
+  "Nosacījumformāta kārtulai nevar būt atsauce uz citu lapu.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'lv'},
+  "Pravidlo podmieneného formátovania nemôže odkazovať na iný hárok.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'sk'},
+  "Conditionele opmaakregel kan niet verwijzen naar een ander blad.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'nl'},
+  "Ehdollinen muotoilusääntö ei voi viitata toiseen taulukkoon.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'fi'},
+  "กฎการจัดรูปแบบตามเงื่อนไขอ้างอิงแผ่นงานอื่นไม่ได้": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'th'},
+  "Reguła formatowania warunkowego nie może odwoływać się do innego arkusza.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'pl'},
   
   // "We're sorry, a server error occurred. Please wait a bit and try again."
   "We're sorry, a server error occurred. Please wait a bit and try again.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'en'},
@@ -419,8 +435,9 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Xin lỗi bạn, máy chủ đã gặp lỗi. Vui lòng chờ một lát và thử lại.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'vi'},
   "Lo sentimos, se ha producido un error en el servidor. Espera un momento y vuelve a intentarlo.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'es'},
   "ขออภัย มีข้อผิดพลาดของเซิร์ฟเวอร์เกิดขึ้น โปรดรอสักครู่แล้วลองอีกครั้ง": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'th'},
-  "很抱歉，伺服器發生錯誤，請稍後再試。": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'zh_TW'},
+  "很抱歉，伺服器發生錯誤，請稍後再試。": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'zh_tw'},
   "Infelizmente ocorreu um erro do servidor. Espere um momento e tente novamente.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'pt'},
+  "Sajnáljuk, szerverhiba történt. Kérjük, várjon egy kicsit, majd próbálkozzon újra.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'hu'},
   
   // "Empty response"
   "Empty response": { ref: NORMALIZED_ERROR.EMPTY_RESPONSE, locale: 'en'},
@@ -435,23 +452,52 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Límite excedido: .": { ref: NORMALIZED_ERROR.LIMIT_EXCEEDED, locale: 'es'},
   "Limite dépassée : .": { ref: NORMALIZED_ERROR.LIMIT_EXCEEDED, locale: 'fr'},
   
+  // User Rate Limit Exceeded
+  "User Rate Limit Exceeded": { ref: NORMALIZED_ERROR.USER_RATE_LIMIT_EXCEEDED, locale: 'en'},
+  
+  // "Not Found"
+  "Not Found": { ref: NORMALIZED_ERROR.NOT_FOUND, locale: 'en'},
+  
+  // "Backend Error"
+  "Backend Error": { ref: NORMALIZED_ERROR.BACKEND_ERROR, locale: 'en'},
+    
   // "Service invoked too many times for one day: email."
   "Service invoked too many times for one day: email.": { ref: NORMALIZED_ERROR.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'en'},
   "Trop d'appels pour ce service aujourd'hui : email.": { ref: NORMALIZED_ERROR.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'fr'},
   "Servicio solicitado demasiadas veces en un mismo día: gmail.": { ref: NORMALIZED_ERROR.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'es'},
   "Serviço chamado muitas vezes no mesmo dia: email.": { ref: NORMALIZED_ERROR.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'pt'},
   
+  // "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit."
+  "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.": { ref: NORMALIZED_ERROR.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'en'},
+  "保護されているセルやオブジェクトを編集しようとしています。編集する必要がある場合は、スプレッドシートのオーナーに連絡して保護を解除してもらってください。": { ref: NORMALIZED_ERROR.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'ja'},
   
+  // "Unable to talk to trigger service"
+  "Unable to talk to trigger service": { ref: NORMALIZED_ERROR.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'en'},
+  "Impossible de communiquer pour déclencher le service": { ref: NORMALIZED_ERROR.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'fr'},
+  
+  // "Mail service not enabled"
+  "Mail service not enabled": { ref: NORMALIZED_ERROR.MAIL_SERVICE_NOT_ENABLED, locale: 'en'},
 };
 
 /**
  * @type {Array<ErrorHandler_.PartialMatcher>}
  */
 ErrorHandler_._ERROR_PARTIAL_MATCH = [
+  // Invalid email: XXX
   {regex: /^Invalid email: (.*)$/,
     variables: ['email'],
     ref: NORMALIZED_ERROR.INVALID_EMAIL,
     locale: 'en'},
+  
+  // Document XXX is missing (perhaps it was deleted?)
+  {regex: /^Document (\S*) is missing \(perhaps it was deleted\?\)$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERROR.DOCUMENT_MISSING,
+    locale: 'en'},
+  {regex: /^Documento (\S*) mancante \(forse è stato eliminato\?\)$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERROR.DOCUMENT_MISSING,
+    locale: 'it'},
 ];
 
 /**
