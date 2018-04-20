@@ -8,8 +8,11 @@
  * expBackoff()
  * urlFetchWithExpBackOff()
  * logError()
- *
- * _convertErrorStack()
+ * getNormalizedError()
+ * getErrorLocale()
+ * 
+ * NORMALIZED_ERRORS
+ * NORETRY_ERRORS
  *****************************************************************/
 
 
