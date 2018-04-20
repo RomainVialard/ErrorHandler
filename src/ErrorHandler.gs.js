@@ -8,8 +8,11 @@
  * expBackoff()
  * urlFetchWithExpBackOff()
  * logError()
- *
- * _convertErrorStack()
+ * getNormalizedError()
+ * getErrorLocale()
+ * 
+ * NORMALIZED_ERRORS
+ * NORETRY_ERRORS
  *****************************************************************/
 
 
@@ -29,15 +32,32 @@
  * ErrorHandler.expBackoff(myFunction);
  *
  * @param {Function} func - The anonymous or named function to call.
- * 
- * @return {*} - The value returned by the called function.
+ *
+ * @param {{}} [options] - options for exponential backoff
+ * @param {boolean} options.throwOnFailure - default to FALSE,  If true, throw the ErrorHandler_.CustomError on failure
+ * @param {boolean} options.doNotLogKnownErrors - default to FALSE, if true, will not log known errors to stackdriver
+ * @param {boolean} options.verbose - default to FALSE, if true, will log a warning on a successful call that failed at least once
+ * @param {number} options.retryNumber - default to 5, maximum number of retry on error
+ *
+ * @return {* | ErrorHandler_.CustomError} - The value returned by the called function, or ErrorHandler_.CustomError on failure if throwOnFailure == false
  */
-function expBackoff(func) {
+function expBackoff(func, options) {
   
-  // execute func() then retry 5 times at most if errors
-  for (var n = 0; n < 6; n++) {
+  // enforce defaults
+  options = options || {};
+  
+  var retry = options.retryNumber || 5;
+  if (retry < 1 || retry > 6) retry = 5;
+  
+  var previousError = null;
+  var retryDelay = null;
+  var oldRetryDelay = null;
+  var customError;
+  
+  // execute func() then retry <retry> times at most if errors
+  for (var n = 0; n < retry; n++) {
     // actual exponential backoff
-    n && Utilities.sleep((Math.pow(2, n-1) * 1000) + (Math.round(Math.random() * 1000)));
+    n && Utilities.sleep(retryDelay || (Math.pow(2, n-1) * 1000) + (Math.round(Math.random() * 1000)));
     
     var response = undefined;
     var error = undefined;
@@ -67,27 +87,76 @@ function expBackoff(func) {
     }
     
     // Return result that is not an error
-    if (noError) return response;
+    if (noError) {
+      if (n && options.verbose){
+        var info = {
+          context: "Exponential Backoff",
+          successful: true,
+          numberRetry: n,
+        };
+        
+        retryDelay && (info.retryDelay = retryDelay);
+        
+        ErrorHandler.logError(previousError, info, {
+          asWarning: true,
+          doNotLogKnownErrors: options.doNotLogKnownErrors,
+        });
+      }
+      
+      return response;
+    }
+    previousError = error;
+    oldRetryDelay = retryDelay;
+    retryDelay = null;
     
     
     // Process error retry
     if (!isUrlFetchResponse && error.message) {
+      var variables = [];
+      var normalizedError = ErrorHandler.getNormalizedError(error.message, variables);
+      
       // Check for errors thrown by Google APIs on which there's no need to retry
       // eg: "Access denied by a security policy established by the administrator of your organization. 
       //      Please contact your administrator for further assistance."
-      if (error.message.indexOf('Invalid requests') !== -1
-          || error.message.indexOf('Access denied') !== -1
-          || error.message.indexOf('Mail service not enabled') !== -1) {
-        throw error;
+      if (!ErrorHandler.NORETRY_ERRORS[normalizedError]) continue;
+      
+      // If specific error that explicitly give the retry time
+      if (normalizedError === ErrorHandler.NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME && variables[0] && variables[0].value) {
+        retryDelay = (new Date(variables[0].value) - new Date()) + 1000;
+        
+        oldRetryDelay && ErrorHandler.logError(error, {
+          failReason: 'Failed after waiting '+ oldRetryDelay +'ms specified time',
+          context: "Exponential Backoff",
+          numberRetry: n,
+          retryDelay: retryDelay,
+        }, {
+          asWarning: true,
+          doNotLogKnownErrors: options.doNotLogKnownErrors,
+        });
+        
+        // Do not wait too long
+        if (retryDelay < 32000) continue;
+        
+        customError = ErrorHandler.logError(error, {
+          failReason: 'Retry delay > 31s',
+          context: "Exponential Backoff",
+          numberRetry: n,
+          retryDelay: retryDelay,
+        }, {doNotLogKnownErrors: options.doNotLogKnownErrors});
+        
+        if (options.throwOnFailure) throw customError;
+        return customError;
       }
       
-      // TODO: YAMM specific ?: move to YAMM code
-      else if (error.message.indexOf('response too large') !== -1) {
-        // Thrown after calling Gmail.Users.Threads.get()
-        // maybe because a specific thread contains too many messages
-        // best to skip the thread
-        return null;
-      }
+      
+      customError = ErrorHandler.logError(error, {
+        failReason: 'No retry needed',
+        numberRetry: n,
+        context: "Exponential Backoff"
+      }, {doNotLogKnownErrors: options.doNotLogKnownErrors});
+      
+      if (options.throwOnFailure) throw customError;
+      return customError;
     }
     
   }
@@ -95,41 +164,25 @@ function expBackoff(func) {
   
   // Action after last re-try
   if (isUrlFetchResponse) {
-    
     ErrorHandler.logError(new Error(response.getContentText()), {
-      shouldInvestigate: true,
-      failedAfter5Retries: true,
+      failReason: 'Max retries reached',
       urlFetchWithMuteHttpExceptions: true,
       context: "Exponential Backoff"
-    });
+    }, {doNotLogKnownErrors: options.doNotLogKnownErrors});
     
     return response;
   }
   
-  else {
-    // 'User-rate limit exceeded' is always followed by 'Retry after' + timestamp
-    // Maybe we should parse the timestamp to check how long we need to wait 
-    // and if we should abort or not
-    // 'User Rate Limit Exceeded' (without '-') isn't followed by 'Retry after' and it makes sense to retry
-    if (error.message && error.message.indexOf('User-rate limit exceeded') !== -1) {
-      ErrorHandler.logError(error, {
-        shouldInvestigate: true,
-        failedAfter5Retries: true,
-        context: "Exponential Backoff"
-      });
-      
-      return null;
-    }
-    
-    // Investigate on errors that are still happening after 5 retries
-    // Especially error "Not Found" - does it make sense to retry on it?
-    ErrorHandler.logError(error, {
-      failedAfter5Retries: true,
-      context: "Exponential Backoff"
-    });
-    
-    throw error;
-  }
+  
+  // Investigate on errors that are still happening after 5 retries
+  // Especially error "Not Found" - does it make sense to retry on it?
+  customError = ErrorHandler.logError(error, {
+    failReason: 'Max retries reached',
+    context: "Exponential Backoff"
+  }, {doNotLogKnownErrors: options.doNotLogKnownErrors});
+  
+  if (options.throwOnFailure) throw customError;
+  return customError;
 }
 
 /**
@@ -137,7 +190,7 @@ function expBackoff(func) {
  *
  * @param {string} url
  * @param {Object} params
- * 
+ *
  * @return {UrlFetchApp.HTTPResponse}  - fetch response
  */
 function urlFetchWithExpBackOff(url, params) {
@@ -151,43 +204,95 @@ function urlFetchWithExpBackOff(url, params) {
 }
 
 /**
+ * @typedef {Error} ErrorHandler_.CustomError
+ *
+ * @property {{
+ *   locale: string,
+ *   originalMessage: string,
+ *   knownError: boolean,
+ *   variables: Array<{}>,
+ *   errorName: string,
+ *   reportLocation: {
+ *     lineNumber: number
+ *     filePath: string,
+ *   },
+ * }} context
+ */
+
+/**
  * If we simply log the error object, only the error message will be submitted to Stackdriver Logging
  * Best to re-write the error as a new object to get lineNumber & stack trace
- * 
- * @param {String || Error || {lineNumber: number, fileName: string, responseCode: string}} e
- * @param {Object || {addonName: string}} additionalParams
+ *
+ * @param {String || Error || {lineNumber: number, fileName: string, responseCode: string}} error
+ * @param {Object || {addonName: string}} [additionalParams]
+ *
+ * @param {{}} [options] - default to FALSE, use console.warn instead console.error
+ * @param {boolean} options.asWarning - default to FALSE, use console.warn instead console.error
+ * @param {boolean} options.doNotLogKnownErrors - default to FALSE, if true, will not log known errors to stackdriver
+ *
+ * @return {ErrorHandler_.CustomError}
  */
-function logError(e, additionalParams) {
-  e = (typeof e === 'string') ? new Error(e) : e;
+function logError(error, additionalParams, options) {
+  options = options || {};
+  
+  error = (typeof error === 'string') ? new Error(error) : error;
+  
+  // Localize error message
+  var partialMatches = [];
+  var normalizedMessage = ErrorHandler.getNormalizedError(error.message, partialMatches);
+  var message = normalizedMessage || error.message;
+  
+  var locale;
+  try {
+    locale = Session.getActiveUserLocale();
+  }
+  catch(err) {
+    // Try to add the locale
+    locale = ErrorHandler.getErrorLocale(error.message);
+  }
   
   var log = {
-    context: {}
+    context: {
+      locale: locale || '',
+      originalMessage: error.message,
+      knownError: !!normalizedMessage,
+    }
   };
   
-  if (e.name) {
+  
+  // Add partialMatches if any
+  if (partialMatches.length) {
+    log.context.variables = {};
+    
+    partialMatches.forEach(function (match) {
+      log.context.variables[match.variable] = match.value;
+    });
+  }
+  
+  if (error.name) {
     // examples of error name: Error, ReferenceError, Exception, GoogleJsonResponseException
     // would be nice to categorize
-    log.context.errorName = e.name;
-    e.message = e.name +": "+ e.message;
+    log.context.errorName = error.name;
+    message = error.name +": "+ message;
   }
-  log.message = e.message;
+  log.message = message;
   
   // Manage error Stack
-  if (e.lineNumber && e.fileName && e.stack) {
+  if (error.lineNumber && error.fileName && error.stack) {
     log.context.reportLocation = {
-      lineNumber: e.lineNumber,
-      filePath: e.fileName
+      lineNumber: error.lineNumber,
+      filePath: error.fileName
     };
     
     var addonName = additionalParams && additionalParams.addonName || undefined;
     
-    var res = ErrorHandler_._convertErrorStack(e.stack, addonName);
+    var res = ErrorHandler_._convertErrorStack(error.stack, addonName);
     log.context.reportLocation.functionName = res.lastFunctionName;
     log.message+= '\n    '+ res.stack;
   }
   
-  if (e.responseCode) {
-    log.context.responseCode = e.responseCode;
+  if (error.responseCode) {
+    log.context.responseCode = error.responseCode;
   }
   
   // Add custom information
@@ -200,8 +305,134 @@ function logError(e, additionalParams) {
   }
   
   // Send error to stackdriver log
-  console.error(log);
+  if (!options.doNotLogKnownErrors || !normalizedMessage) {
+    if (options.asWarning) console.warn(log);
+    else console.error(log);
+  }
+  
+  // Return an error, with context
+  var customError = new Error(normalizedMessage || error.message);
+  customError.context = log.context;
+  
+  return customError;
 }
+
+
+/**
+ * Return the english version of the error if listed in this library
+ *
+ * @type {string} localizedErrorMessage
+ * @type {Array<{
+ *   variable: string,
+ *   value: string
+ * }>} partialMatches - Pass an empty array, getNormalizedError() will populate it with found extracted variables in case of a partial match
+ *
+ * @return {ErrorHandler_.NORMALIZED_ERROR | ''} the error in English or '' if no matching error was found
+ */
+function getNormalizedError(localizedErrorMessage, partialMatches) {
+  /**
+   * @type {ErrorHandler_.ErrorMatcher}
+   */
+  var error = ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS[localizedErrorMessage];
+  
+  if (error) return error.ref;
+  if (typeof localizedErrorMessage !== 'string') return '';
+  
+  // No exact match, try to execute a partial match
+  var match;
+  
+  /**
+   * @type {ErrorHandler_.PartialMatcher}
+   */
+  var matcher;
+  
+  for (var i = 0; matcher = ErrorHandler_._ERROR_PARTIAL_MATCH[i]; i++) {
+    // search for a match
+    match = localizedErrorMessage.match(matcher.regex);
+    if (match) break;
+  }
+  
+  // No match found
+  if (!match) return '';
+  
+  // Extract partial match variables
+  for (var j = 0, variable; variable = matcher.variables[j] ; j++) {
+    partialMatches.push({
+      variable: variable,
+      value: match[j+1] !== undefined && match[j+1] || ''
+    });
+  }
+  
+  return matcher.ref;
+}
+
+/**
+ * Try to find the locale of the localized thrown error
+ *
+ * @type {string} localizedErrorMessage
+ *
+ * @return {string | ''} return the locale or '' if no matching error found
+ */
+function getErrorLocale(localizedErrorMessage) {
+  /**
+   * @type {ErrorHandler_.ErrorMatcher}
+   */
+  var error = ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS[localizedErrorMessage];
+  
+  if (error) return error.locale;
+  if (typeof localizedErrorMessage !== 'string') return '';
+  
+  // No exact match, try to execute a partial match
+  var match;
+  
+  /**
+   * @type {ErrorHandler_.PartialMatcher}
+   */
+  var matcher;
+  
+  for (var i = 0; matcher = ErrorHandler_._ERROR_PARTIAL_MATCH[i]; i++) {
+    // search for a match
+    match = localizedErrorMessage.match(matcher.regex);
+    if (match) break;
+  }
+  
+  // No match found
+  if (!match) return '';
+  
+  return matcher.locale;
+}
+
+
+/**
+ * @typedef {string} ErrorHandler_.NORMALIZED_ERROR
+ */
+
+NORMALIZED_ERRORS = {
+  CONDITIONNAL_RULE_REFERENCE_DIF_SHEET: "Conditional format rule cannot reference a different sheet.",
+  SERVER_ERROR_RETRY_LATER: "We're sorry, a server error occurred. Please wait a bit and try again.",
+  AUTHORIZATION_REQUIRED: "Authorization is required to perform that action. Please run the script again to authorize it.",
+  EMPTY_RESPONSE: "Empty response",
+  LIMIT_EXCEEDED: "Limit Exceeded: .",
+  USER_RATE_LIMIT_EXCEEDED: "User Rate Limit Exceeded",
+  NOT_FOUND: "Not Found",
+  BACKEND_ERROR: "Backend Error",
+  SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL: "Service invoked too many times for one day: email.",
+  TRYING_TO_EDIT_PROTECTED_CELL: "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.",
+  UNABLE_TO_TALK_TO_TRIGGER_SERVICE: "Unable to talk to trigger service",
+  MAIL_SERVICE_NOT_ENABLED: "Mail service not enabled",
+  INVALID_THREAD_ID_VALUE: "Invalid thread_id value",
+  
+  // Partial match error
+  INVALID_EMAIL: 'Invalid email',
+  DOCUMENT_MISSING: 'Document is missing (perhaps it was deleted?)',
+  USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME: 'User-rate limit exceeded. Retry after specified time.',
+};
+NORETRY_ERRORS = {};
+NORETRY_ERRORS[NORMALIZED_ERRORS.INVALID_EMAIL] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.MAIL_SERVICE_NOT_ENABLED] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED] = true;
 
 
 // noinspection JSUnusedGlobalSymbols, ThisExpressionReferencesGlobalObjectJS
@@ -209,15 +440,23 @@ this['ErrorHandler'] = {
   // Add local alias to run the library as normal code
   expBackoff: expBackoff,
   urlFetchWithExpBackOff: urlFetchWithExpBackOff,
-  logError: logError
+  logError: logError,
+  
+  getNormalizedError: getNormalizedError,
+  getErrorLocale: getErrorLocale,
+  NORMALIZED_ERRORS: NORMALIZED_ERRORS,
+  NORETRY_ERRORS: NORETRY_ERRORS,
 };
 
 //<editor-fold desc="# Private methods">
 
 var ErrorHandler_ = {};
 
-// Get GAS global object: top-level this
+
 // noinspection ThisExpressionReferencesGlobalObjectJS
+/**
+ * Get GAS global object: top-level this
+ */
 ErrorHandler_._this = this;
 
 /**
@@ -255,5 +494,144 @@ ErrorHandler_._convertErrorStack = function (stack, addonName) {
     lastFunctionName: lastFunctionName
   };
 };
+
+
+// noinspection NonAsciiCharacters, JSNonASCIINames
+/**
+ * Map all different error translation to their english counterpart,
+ * Thanks to Google AppsScript throwing localized errors, it's impossible to easily catch them and actually do something to fix it for our users.
+ *
+ * @type {Object<ErrorHandler_.ErrorMatcher>}
+ */
+ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
+  // "Conditional format rule cannot reference a different sheet."
+  "Conditional format rule cannot reference a different sheet.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'en'},
+  "Quy tắc định dạng có điều kiện không thể tham chiếu một trang tính khác.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'vi'},
+  "La regla de formato condicional no puede hacer referencia a una hoja diferente.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'es'},
+  "La regola di formattazione condizionale non può contenere un riferimento a un altro foglio.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'it'},
+  "La règle de mise en forme conditionnelle ne doit pas faire référence à une autre feuille.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'fr'},
+  "Die Regel für eine bedingte Formatierung darf sich nicht auf ein anderes Tabellenblatt beziehen.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'de'},
+  "Правило условного форматирования не может ссылаться на другой лист.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ru'},
+  "조건부 서식 규칙은 다른 시트를 참조할 수 없습니다.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ko'},
+  "條件式格式規則無法參照其他工作表。": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'zh_tw'},
+  "条件格式规则无法引用其他工作表。": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'zh_cn'},
+  "条件付き書式ルールで別のシートを参照することはできません。": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ja'},
+  "Pravidlo podmíněného formátu nemůže odkazovat na jiný list.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'cs'},
+  "Nosacījumformāta kārtulai nevar būt atsauce uz citu lapu.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'lv'},
+  "Pravidlo podmieneného formátovania nemôže odkazovať na iný hárok.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'sk'},
+  "Conditionele opmaakregel kan niet verwijzen naar een ander blad.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'nl'},
+  "Ehdollinen muotoilusääntö ei voi viitata toiseen taulukkoon.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'fi'},
+  "กฎการจัดรูปแบบตามเงื่อนไขอ้างอิงแผ่นงานอื่นไม่ได้": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'th'},
+  "Reguła formatowania warunkowego nie może odwoływać się do innego arkusza.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'pl'},
+  "Aturan format bersyarat tidak dapat merujuk ke sheet yang berbeda.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'in'},
+  "Villkorsstyrd formateringsregel får inte referera till ett annat arbetsblad.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'sv'},
+  "La regla de format condicional no pot fer referència a un altre full.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ca'},
+  "A feltételes formázási szabály nem tud másik munkalapot meghívni.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'hu'},
+  "A regra de formatação condicional não pode fazer referência a uma página diferente.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'pt'},
+  "Правило умовного форматування не може посилатися на інший аркуш.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'uk'},
+  "لا يمكن أن تشير الصيغة الشرطية إلى ورقة مختلفة.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ar_sa'},
+  
+  // "We're sorry, a server error occurred. Please wait a bit and try again."
+  "We're sorry, a server error occurred. Please wait a bit and try again.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'en'},
+  "Spiacenti. Si è verificato un errore del server. Attendi e riprova.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'it'},
+  "Une erreur est survenue sur le serveur. Nous vous prions de nous en excuser et vous invitons à réessayer ultérieurement.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'fr'},
+  "Xin lỗi bạn, máy chủ đã gặp lỗi. Vui lòng chờ một lát và thử lại.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'vi'},
+  "Lo sentimos, se ha producido un error en el servidor. Espera un momento y vuelve a intentarlo.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'es'},
+  "ขออภัย มีข้อผิดพลาดของเซิร์ฟเวอร์เกิดขึ้น โปรดรอสักครู่แล้วลองอีกครั้ง": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'th'},
+  "很抱歉，伺服器發生錯誤，請稍後再試。": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'zh_tw'},
+  "Infelizmente ocorreu um erro do servidor. Espere um momento e tente novamente.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'pt'},
+  "Sajnáljuk, szerverhiba történt. Kérjük, várjon egy kicsit, majd próbálkozzon újra.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'hu'},
+  "Ett serverfel uppstod. Vänta lite och försök igen.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'sv'},
+  
+  // "Authorization is required to perform that action. Please run the script again to authorize it."
+  "Authorization is required to perform that action. Please run the script again to authorize it.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'en'},
+  "Cần được cho phép để thực hiện tác vụ đó. Hãy chạy lại tập lệnh để cho phép tác vụ.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'vi'},
+  
+  // "Empty response"
+  "Empty response": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'en'},
+  "Respuesta vacía": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'es'},
+  "Réponse vierge": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'fr'},
+  "Câu trả lời trống": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'vi'},
+  "Resposta vazia": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'pt'},
+  "Prázdná odpověď": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'cs'},
+  
+  // "Limit Exceeded: ."
+  "Limit Exceeded: .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'en'},
+  "Límite excedido: .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'es'},
+  "Limite dépassée : .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'fr'},
+  
+  // User Rate Limit Exceeded
+  "User Rate Limit Exceeded": { ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED, locale: 'en'},
+  
+  // "Not Found"
+  "Not Found": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'en'},
+  
+  // "Backend Error"
+  "Backend Error": { ref: NORMALIZED_ERRORS.BACKEND_ERROR, locale: 'en'},
+  
+  // "Service invoked too many times for one day: email."
+  "Service invoked too many times for one day: email.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'en'},
+  "Trop d'appels pour ce service aujourd'hui : email.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'fr'},
+  "Servicio solicitado demasiadas veces en un mismo día: gmail.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'es'},
+  "Serviço chamado muitas vezes no mesmo dia: email.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'pt'},
+  
+  // "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit."
+  "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'en'},
+  "保護されているセルやオブジェクトを編集しようとしています。編集する必要がある場合は、スプレッドシートのオーナーに連絡して保護を解除してもらってください。": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'ja'},
+  
+  // "Unable to talk to trigger service"
+  "Unable to talk to trigger service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'en'},
+  "Impossible de communiquer pour déclencher le service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'fr'},
+  
+  // "Mail service not enabled"
+  "Mail service not enabled": { ref: NORMALIZED_ERRORS.MAIL_SERVICE_NOT_ENABLED, locale: 'en'},
+  
+  // "Invalid thread_id value"
+  "Invalid thread_id value": { ref: NORMALIZED_ERRORS.INVALID_THREAD_ID_VALUE, locale: 'en'},
+};
+
+/**
+ * @type {Array<ErrorHandler_.PartialMatcher>}
+ */
+ErrorHandler_._ERROR_PARTIAL_MATCH = [
+  // Invalid email: XXX
+  {regex: /^Invalid email: (.*)$/,
+    variables: ['email'],
+    ref: NORMALIZED_ERRORS.INVALID_EMAIL,
+    locale: 'en'},
+  
+  // Document XXX is missing (perhaps it was deleted?)
+  {regex: /^Document (\S*) is missing \(perhaps it was deleted\?\)$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
+    locale: 'en'},
+  {regex: /^Documento (\S*) mancante \(forse è stato eliminato\?\)$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
+    locale: 'it'},
+  
+  // User-rate limit exceeded. Retry after XXX
+  {regex: /^(?:Limit Exceeded: : )?User-rate limit exceeded\.\s+Retry after (.*Z)/,
+    variables: ['timestamp'],
+    ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
+    locale: 'en'},
+
+];
+
+/**
+ * @typedef {{}} ErrorHandler_.PartialMatcher
+ *
+ * @property {RegExp} regex - Regex describing the error
+ * @property {Array<string>} variables - Ordered list naming the successive extracted value by the regex groups
+ * @property {ErrorHandler_.NORMALIZED_ERROR} ref - Error reference
+ * @property {string} locale - Error locale
+ */
+/**
+ * @typedef {{}} ErrorHandler_.ErrorMatcher
+ *
+ * @property {ErrorHandler_.NORMALIZED_ERROR} ref - Error reference
+ * @property {string} locale - Error locale
+ */
+
 
 //</editor-fold>
