@@ -419,6 +419,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Правило условного форматирования не может ссылаться на другой лист.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ru'},
   "조건부 서식 규칙은 다른 시트를 참조할 수 없습니다.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ko'},
   "條件式格式規則無法參照其他工作表。": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'zh_tw'},
+  "条件格式规则无法引用其他工作表。": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'zh_cn'},
   "条件付き書式ルールで別のシートを参照することはできません。": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ja'},
   "Pravidlo podmíněného formátu nemůže odkazovat na jiný list.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'cs'},
   "Nosacījumformāta kārtulai nevar būt atsauce uz citu lapu.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'lv'},
@@ -515,7 +516,7 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     locale: 'it'},
   
   // User-rate limit exceeded. Retry after XXX
-  {regex: /^User-rate limit exceeded. Retry after (.*)$/,
+  {regex: /^User-rate limit exceeded\. Retry after (.*)$/,
     variables: ['timestamp'],
     ref: NORMALIZED_ERROR.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
     locale: 'en'},
