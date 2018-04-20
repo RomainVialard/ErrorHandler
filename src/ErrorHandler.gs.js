@@ -114,7 +114,7 @@ function expBackoff(func, options) {
       if (!ErrorHandler.NORETRY_ERRORS[normalizedError]) continue;
       
       // If specific error that explicitly give the retry time
-      if (normalizedError === ErrorHandler.NORMALIZED_ERROR.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME && variables[0] && variables[0].value) {
+      if (normalizedError === ErrorHandler.NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME && variables[0] && variables[0].value) {
         retryDelay = (new Date(variables[0].value) - new Date()) + 1000;
         
         oldRetryDelay && options.logError && ErrorHandler.logError(error, {
@@ -366,7 +366,7 @@ function getErrorLocale(localizedErrorMessage) {
  * @typedef {string} ErrorHandler_.NORMALIZED_ERROR
  */
 
-NORMALIZED_ERROR = {
+NORMALIZED_ERRORS = {
   CONDITIONNAL_RULE_REFERENCE_DIF_SHEET: "Conditional format rule cannot reference a different sheet.",
   SERVER_ERROR_RETRY_LATER: "We're sorry, a server error occurred. Please wait a bit and try again.",
   AUTHORIZATION_REQUIRED: "Authorization is required to perform that action. Please run the script again to authorize it.",
@@ -387,11 +387,11 @@ NORMALIZED_ERROR = {
   USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME: 'User-rate limit exceeded. Retry after specified time.',
 };
 NORETRY_ERRORS = {};
-NORETRY_ERRORS[NORMALIZED_ERROR.INVALID_EMAIL] = true;
-NORETRY_ERRORS[NORMALIZED_ERROR.MAIL_SERVICE_NOT_ENABLED] = true;
-NORETRY_ERRORS[NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET] = true;
-NORETRY_ERRORS[NORMALIZED_ERROR.TRYING_TO_EDIT_PROTECTED_CELL] = true;
-NORETRY_ERRORS[NORMALIZED_ERROR.AUTHORIZATION_REQUIRED] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.INVALID_EMAIL] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.MAIL_SERVICE_NOT_ENABLED] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED] = true;
 
 
 // noinspection JSUnusedGlobalSymbols, ThisExpressionReferencesGlobalObjectJS
@@ -403,7 +403,7 @@ this['ErrorHandler'] = {
   
   getNormalizedError: getNormalizedError,
   getErrorLocale: getErrorLocale,
-  NORMALIZED_ERROR: NORMALIZED_ERROR,
+  NORMALIZED_ERRORS: NORMALIZED_ERRORS,
   NORETRY_ERRORS: NORETRY_ERRORS,
 };
 
@@ -464,89 +464,89 @@ ErrorHandler_._convertErrorStack = function (stack, addonName) {
  */
 ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // "Conditional format rule cannot reference a different sheet."
-  "Conditional format rule cannot reference a different sheet.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'en'},
-  "Quy tắc định dạng có điều kiện không thể tham chiếu một trang tính khác.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'vi'},
-  "La regla de formato condicional no puede hacer referencia a una hoja diferente.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'es'},
-  "La regola di formattazione condizionale non può contenere un riferimento a un altro foglio.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'it'},
-  "La règle de mise en forme conditionnelle ne doit pas faire référence à une autre feuille.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'fr'},
-  "Die Regel für eine bedingte Formatierung darf sich nicht auf ein anderes Tabellenblatt beziehen.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'de'},
-  "Правило условного форматирования не может ссылаться на другой лист.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ru'},
-  "조건부 서식 규칙은 다른 시트를 참조할 수 없습니다.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ko'},
-  "條件式格式規則無法參照其他工作表。": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'zh_tw'},
-  "条件格式规则无法引用其他工作表。": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'zh_cn'},
-  "条件付き書式ルールで別のシートを参照することはできません。": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ja'},
-  "Pravidlo podmíněného formátu nemůže odkazovat na jiný list.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'cs'},
-  "Nosacījumformāta kārtulai nevar būt atsauce uz citu lapu.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'lv'},
-  "Pravidlo podmieneného formátovania nemôže odkazovať na iný hárok.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'sk'},
-  "Conditionele opmaakregel kan niet verwijzen naar een ander blad.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'nl'},
-  "Ehdollinen muotoilusääntö ei voi viitata toiseen taulukkoon.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'fi'},
-  "กฎการจัดรูปแบบตามเงื่อนไขอ้างอิงแผ่นงานอื่นไม่ได้": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'th'},
-  "Reguła formatowania warunkowego nie może odwoływać się do innego arkusza.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'pl'},
-  "Aturan format bersyarat tidak dapat merujuk ke sheet yang berbeda.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'in'},
-  "Villkorsstyrd formateringsregel får inte referera till ett annat arbetsblad.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'sv'},
-  "La regla de format condicional no pot fer referència a un altre full.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ca'},
-  "A feltételes formázási szabály nem tud másik munkalapot meghívni.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'hu'},
-  "A regra de formatação condicional não pode fazer referência a uma página diferente.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'pt'},
-  "Правило умовного форматування не може посилатися на інший аркуш.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'uk'},
-  "لا يمكن أن تشير الصيغة الشرطية إلى ورقة مختلفة.": { ref: NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ar_sa'},
+  "Conditional format rule cannot reference a different sheet.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'en'},
+  "Quy tắc định dạng có điều kiện không thể tham chiếu một trang tính khác.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'vi'},
+  "La regla de formato condicional no puede hacer referencia a una hoja diferente.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'es'},
+  "La regola di formattazione condizionale non può contenere un riferimento a un altro foglio.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'it'},
+  "La règle de mise en forme conditionnelle ne doit pas faire référence à une autre feuille.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'fr'},
+  "Die Regel für eine bedingte Formatierung darf sich nicht auf ein anderes Tabellenblatt beziehen.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'de'},
+  "Правило условного форматирования не может ссылаться на другой лист.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ru'},
+  "조건부 서식 규칙은 다른 시트를 참조할 수 없습니다.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ko'},
+  "條件式格式規則無法參照其他工作表。": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'zh_tw'},
+  "条件格式规则无法引用其他工作表。": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'zh_cn'},
+  "条件付き書式ルールで別のシートを参照することはできません。": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ja'},
+  "Pravidlo podmíněného formátu nemůže odkazovat na jiný list.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'cs'},
+  "Nosacījumformāta kārtulai nevar būt atsauce uz citu lapu.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'lv'},
+  "Pravidlo podmieneného formátovania nemôže odkazovať na iný hárok.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'sk'},
+  "Conditionele opmaakregel kan niet verwijzen naar een ander blad.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'nl'},
+  "Ehdollinen muotoilusääntö ei voi viitata toiseen taulukkoon.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'fi'},
+  "กฎการจัดรูปแบบตามเงื่อนไขอ้างอิงแผ่นงานอื่นไม่ได้": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'th'},
+  "Reguła formatowania warunkowego nie może odwoływać się do innego arkusza.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'pl'},
+  "Aturan format bersyarat tidak dapat merujuk ke sheet yang berbeda.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'in'},
+  "Villkorsstyrd formateringsregel får inte referera till ett annat arbetsblad.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'sv'},
+  "La regla de format condicional no pot fer referència a un altre full.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ca'},
+  "A feltételes formázási szabály nem tud másik munkalapot meghívni.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'hu'},
+  "A regra de formatação condicional não pode fazer referência a uma página diferente.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'pt'},
+  "Правило умовного форматування не може посилатися на інший аркуш.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'uk'},
+  "لا يمكن أن تشير الصيغة الشرطية إلى ورقة مختلفة.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ar_sa'},
   
   // "We're sorry, a server error occurred. Please wait a bit and try again."
-  "We're sorry, a server error occurred. Please wait a bit and try again.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'en'},
-  "Spiacenti. Si è verificato un errore del server. Attendi e riprova.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'it'},
-  "Une erreur est survenue sur le serveur. Nous vous prions de nous en excuser et vous invitons à réessayer ultérieurement.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'fr'},
-  "Xin lỗi bạn, máy chủ đã gặp lỗi. Vui lòng chờ một lát và thử lại.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'vi'},
-  "Lo sentimos, se ha producido un error en el servidor. Espera un momento y vuelve a intentarlo.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'es'},
-  "ขออภัย มีข้อผิดพลาดของเซิร์ฟเวอร์เกิดขึ้น โปรดรอสักครู่แล้วลองอีกครั้ง": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'th'},
-  "很抱歉，伺服器發生錯誤，請稍後再試。": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'zh_tw'},
-  "Infelizmente ocorreu um erro do servidor. Espere um momento e tente novamente.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'pt'},
-  "Sajnáljuk, szerverhiba történt. Kérjük, várjon egy kicsit, majd próbálkozzon újra.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'hu'},
-  "Ett serverfel uppstod. Vänta lite och försök igen.": { ref: NORMALIZED_ERROR.SERVER_ERROR_RETRY_LATER, locale: 'sv'},
+  "We're sorry, a server error occurred. Please wait a bit and try again.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'en'},
+  "Spiacenti. Si è verificato un errore del server. Attendi e riprova.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'it'},
+  "Une erreur est survenue sur le serveur. Nous vous prions de nous en excuser et vous invitons à réessayer ultérieurement.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'fr'},
+  "Xin lỗi bạn, máy chủ đã gặp lỗi. Vui lòng chờ một lát và thử lại.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'vi'},
+  "Lo sentimos, se ha producido un error en el servidor. Espera un momento y vuelve a intentarlo.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'es'},
+  "ขออภัย มีข้อผิดพลาดของเซิร์ฟเวอร์เกิดขึ้น โปรดรอสักครู่แล้วลองอีกครั้ง": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'th'},
+  "很抱歉，伺服器發生錯誤，請稍後再試。": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'zh_tw'},
+  "Infelizmente ocorreu um erro do servidor. Espere um momento e tente novamente.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'pt'},
+  "Sajnáljuk, szerverhiba történt. Kérjük, várjon egy kicsit, majd próbálkozzon újra.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'hu'},
+  "Ett serverfel uppstod. Vänta lite och försök igen.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'sv'},
   
   // "Authorization is required to perform that action. Please run the script again to authorize it."
-  "Authorization is required to perform that action. Please run the script again to authorize it.": { ref: NORMALIZED_ERROR.AUTHORIZATION_REQUIRED, locale: 'en'},
-  "Cần được cho phép để thực hiện tác vụ đó. Hãy chạy lại tập lệnh để cho phép tác vụ.": { ref: NORMALIZED_ERROR.AUTHORIZATION_REQUIRED, locale: 'vi'},
+  "Authorization is required to perform that action. Please run the script again to authorize it.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'en'},
+  "Cần được cho phép để thực hiện tác vụ đó. Hãy chạy lại tập lệnh để cho phép tác vụ.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'vi'},
   
   // "Empty response"
-  "Empty response": { ref: NORMALIZED_ERROR.EMPTY_RESPONSE, locale: 'en'},
-  "Respuesta vacía": { ref: NORMALIZED_ERROR.EMPTY_RESPONSE, locale: 'es'},
-  "Réponse vierge": { ref: NORMALIZED_ERROR.EMPTY_RESPONSE, locale: 'fr'},
-  "Câu trả lời trống": { ref: NORMALIZED_ERROR.EMPTY_RESPONSE, locale: 'vi'},
-  "Resposta vazia": { ref: NORMALIZED_ERROR.EMPTY_RESPONSE, locale: 'pt'},
-  "Prázdná odpověď": { ref: NORMALIZED_ERROR.EMPTY_RESPONSE, locale: 'cs'},
+  "Empty response": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'en'},
+  "Respuesta vacía": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'es'},
+  "Réponse vierge": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'fr'},
+  "Câu trả lời trống": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'vi'},
+  "Resposta vazia": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'pt'},
+  "Prázdná odpověď": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'cs'},
   
   // "Limit Exceeded: ."
-  "Limit Exceeded: .": { ref: NORMALIZED_ERROR.LIMIT_EXCEEDED, locale: 'en'},
-  "Límite excedido: .": { ref: NORMALIZED_ERROR.LIMIT_EXCEEDED, locale: 'es'},
-  "Limite dépassée : .": { ref: NORMALIZED_ERROR.LIMIT_EXCEEDED, locale: 'fr'},
+  "Limit Exceeded: .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'en'},
+  "Límite excedido: .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'es'},
+  "Limite dépassée : .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'fr'},
   
   // User Rate Limit Exceeded
-  "User Rate Limit Exceeded": { ref: NORMALIZED_ERROR.USER_RATE_LIMIT_EXCEEDED, locale: 'en'},
+  "User Rate Limit Exceeded": { ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED, locale: 'en'},
   
   // "Not Found"
-  "Not Found": { ref: NORMALIZED_ERROR.NOT_FOUND, locale: 'en'},
+  "Not Found": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'en'},
   
   // "Backend Error"
-  "Backend Error": { ref: NORMALIZED_ERROR.BACKEND_ERROR, locale: 'en'},
+  "Backend Error": { ref: NORMALIZED_ERRORS.BACKEND_ERROR, locale: 'en'},
   
   // "Service invoked too many times for one day: email."
-  "Service invoked too many times for one day: email.": { ref: NORMALIZED_ERROR.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'en'},
-  "Trop d'appels pour ce service aujourd'hui : email.": { ref: NORMALIZED_ERROR.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'fr'},
-  "Servicio solicitado demasiadas veces en un mismo día: gmail.": { ref: NORMALIZED_ERROR.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'es'},
-  "Serviço chamado muitas vezes no mesmo dia: email.": { ref: NORMALIZED_ERROR.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'pt'},
+  "Service invoked too many times for one day: email.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'en'},
+  "Trop d'appels pour ce service aujourd'hui : email.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'fr'},
+  "Servicio solicitado demasiadas veces en un mismo día: gmail.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'es'},
+  "Serviço chamado muitas vezes no mesmo dia: email.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'pt'},
   
   // "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit."
-  "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.": { ref: NORMALIZED_ERROR.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'en'},
-  "保護されているセルやオブジェクトを編集しようとしています。編集する必要がある場合は、スプレッドシートのオーナーに連絡して保護を解除してもらってください。": { ref: NORMALIZED_ERROR.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'ja'},
+  "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'en'},
+  "保護されているセルやオブジェクトを編集しようとしています。編集する必要がある場合は、スプレッドシートのオーナーに連絡して保護を解除してもらってください。": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'ja'},
   
   // "Unable to talk to trigger service"
-  "Unable to talk to trigger service": { ref: NORMALIZED_ERROR.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'en'},
-  "Impossible de communiquer pour déclencher le service": { ref: NORMALIZED_ERROR.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'fr'},
+  "Unable to talk to trigger service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'en'},
+  "Impossible de communiquer pour déclencher le service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'fr'},
   
   // "Mail service not enabled"
-  "Mail service not enabled": { ref: NORMALIZED_ERROR.MAIL_SERVICE_NOT_ENABLED, locale: 'en'},
+  "Mail service not enabled": { ref: NORMALIZED_ERRORS.MAIL_SERVICE_NOT_ENABLED, locale: 'en'},
   
   // "Invalid thread_id value"
-  "Invalid thread_id value": { ref: NORMALIZED_ERROR.INVALID_THREAD_ID_VALUE, locale: 'en'},
+  "Invalid thread_id value": { ref: NORMALIZED_ERRORS.INVALID_THREAD_ID_VALUE, locale: 'en'},
 };
 
 /**
@@ -556,23 +556,23 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
   // Invalid email: XXX
   {regex: /^Invalid email: (.*)$/,
     variables: ['email'],
-    ref: NORMALIZED_ERROR.INVALID_EMAIL,
+    ref: NORMALIZED_ERRORS.INVALID_EMAIL,
     locale: 'en'},
   
   // Document XXX is missing (perhaps it was deleted?)
   {regex: /^Document (\S*) is missing \(perhaps it was deleted\?\)$/,
     variables: ['docId'],
-    ref: NORMALIZED_ERROR.DOCUMENT_MISSING,
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
     locale: 'en'},
   {regex: /^Documento (\S*) mancante \(forse è stato eliminato\?\)$/,
     variables: ['docId'],
-    ref: NORMALIZED_ERROR.DOCUMENT_MISSING,
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
     locale: 'it'},
   
   // User-rate limit exceeded. Retry after XXX
   {regex: /^(?:Limit Exceeded: : )?User-rate limit exceeded\.\s+Retry after (.*Z)/,
     variables: ['timestamp'],
-    ref: NORMALIZED_ERROR.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
+    ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
     locale: 'en'},
 
 ];
