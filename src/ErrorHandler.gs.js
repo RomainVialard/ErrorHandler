@@ -31,12 +31,12 @@
  * @param {Function} func - The anonymous or named function to call.
  *
  * @param {{}} [options] - options for exponential backoff
- * @param {boolean} options.withSilentFailure - default to FALSE,  If true, will return null on failure
+ * @param {boolean} options.throwOnFailure - default to FALSE,  If true, throw the ErrorHandler_.CustomError on failure
  * @param {boolean} options.doNotLogKnownErrors - default to FALSE, if true, will not log known errors to stackdriver
  * @param {boolean} options.verbose - default to FALSE, if true, will log a warning on a successful call that failed at least once
  * @param {number} options.retryNumber - default to 5, maximum number of retry on error
  *
- * @return {* | null} - The value returned by the called function, or null on failure if withSilentFailure == true
+ * @return {* | ErrorHandler_.CustomError} - The value returned by the called function, or ErrorHandler_.CustomError on failure if throwOnFailure == false
  */
 function expBackoff(func, options) {
   
@@ -49,6 +49,7 @@ function expBackoff(func, options) {
   var previousError = null;
   var retryDelay = null;
   var oldRetryDelay = null;
+  var customError;
   
   // execute func() then retry <retry> times at most if errors
   for (var n = 0; n < retry; n++) {
@@ -105,6 +106,7 @@ function expBackoff(func, options) {
     oldRetryDelay = retryDelay;
     retryDelay = null;
     
+    
     // Process error retry
     if (!isUrlFetchResponse && error.message) {
       var variables = [];
@@ -132,26 +134,26 @@ function expBackoff(func, options) {
         // Do not wait too long
         if (retryDelay < 32000) continue;
         
-        ErrorHandler.logError(error, {
+        customError = ErrorHandler.logError(error, {
           failReason: 'Retry delay > 31s',
           context: "Exponential Backoff",
           numberRetry: n,
           retryDelay: retryDelay,
         }, {doNotLogKnownErrors: options.doNotLogKnownErrors});
         
-        if (options.withSilentFailure) return null;
-        throw error;
+        if (options.throwOnFailure) throw customError;
+        return customError;
       }
       
       
-      ErrorHandler.logError(error, {
+      customError = ErrorHandler.logError(error, {
         failReason: 'No retry needed',
         numberRetry: n,
         context: "Exponential Backoff"
       }, {doNotLogKnownErrors: options.doNotLogKnownErrors});
       
-      if (options.withSilentFailure) return null;
-      throw error;
+      if (options.throwOnFailure) throw customError;
+      return customError;
     }
     
   }
@@ -171,13 +173,13 @@ function expBackoff(func, options) {
   
   // Investigate on errors that are still happening after 5 retries
   // Especially error "Not Found" - does it make sense to retry on it?
-  ErrorHandler.logError(error, {
+  customError = ErrorHandler.logError(error, {
     failReason: 'Max retries reached',
     context: "Exponential Backoff"
   }, {doNotLogKnownErrors: options.doNotLogKnownErrors});
   
-  if (options.withSilentFailure) return null;
-  throw error;
+  if (options.throwOnFailure) throw customError;
+  return customError;
 }
 
 /**
@@ -199,15 +201,33 @@ function urlFetchWithExpBackOff(url, params) {
 }
 
 /**
+ * @typedef {Error} ErrorHandler_.CustomError
+ *
+ * @property {{
+ *   locale: string,
+ *   originalMessage: string,
+ *   knownError: boolean,
+ *   variables: Array<{}>,
+ *   errorName: string,
+ *   reportLocation: {
+ *     lineNumber: number
+ *     filePath: string,
+ *   },
+ * }} context
+ */
+
+/**
  * If we simply log the error object, only the error message will be submitted to Stackdriver Logging
  * Best to re-write the error as a new object to get lineNumber & stack trace
  *
  * @param {String || Error || {lineNumber: number, fileName: string, responseCode: string}} error
  * @param {Object || {addonName: string}} [additionalParams]
- * 
+ *
  * @param {{}} [options] - default to FALSE, use console.warn instead console.error
  * @param {boolean} options.asWarning - default to FALSE, use console.warn instead console.error
  * @param {boolean} options.doNotLogKnownErrors - default to FALSE, if true, will not log known errors to stackdriver
+ *
+ * @return {ErrorHandler_.CustomError}
  */
 function logError(error, additionalParams, options) {
   options = options || {};
@@ -218,9 +238,6 @@ function logError(error, additionalParams, options) {
   var partialMatches = [];
   var normalizedMessage = ErrorHandler.getNormalizedError(error.message, partialMatches);
   var message = normalizedMessage || error.message;
-  
-  // options.doNotLogKnownErrors
-  if (options.doNotLogKnownErrors && normalizedMessage) return;
   
   var locale;
   try {
@@ -235,7 +252,7 @@ function logError(error, additionalParams, options) {
     context: {
       locale: locale || '',
       originalMessage: error.message,
-      translated: !!normalizedMessage,
+      knownError: !!normalizedMessage,
     }
   };
   
@@ -285,8 +302,16 @@ function logError(error, additionalParams, options) {
   }
   
   // Send error to stackdriver log
-  if (options.asWarning) console.warn(log);
-  else console.error(log);
+  if (!options.doNotLogKnownErrors || !normalizedMessage) {
+    if (options.asWarning) console.warn(log);
+    else console.error(log);
+  }
+  
+  // Return an error, with context
+  var customError = new Error(normalizedMessage || error.message);
+  customError.context = log.context;
+  
+  return customError;
 }
 
 
