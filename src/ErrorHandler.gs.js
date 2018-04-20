@@ -31,8 +31,8 @@
  * @param {Function} func - The anonymous or named function to call.
  *
  * @param {{}} [options] - options for exponential backoff
- * @param {boolean} options.withSilentFailure - default to FALSE,  If set to true, will return null on failure
- * @param {boolean} options.logError - default to TRUE, If true, will return null on failure
+ * @param {boolean} options.withSilentFailure - default to FALSE,  If true, will return null on failure
+ * @param {boolean} options.doNotLogKnownErrors - default to FALSE, if true, will not log known errors to stackdriver
  * @param {boolean} options.verbose - default to FALSE, if true, will log a warning on a successful call that failed at least once
  * @param {number} options.retryNumber - default to 5, maximum number of retry on error
  *
@@ -42,7 +42,6 @@ function expBackoff(func, options) {
   
   // enforce defaults
   options = options || {};
-  options.logError = !('logError' in options) && true || options.logError;
   
   var retry = options.retryNumber || 5;
   if (retry < 1 || retry > 6) retry = 5;
@@ -94,7 +93,10 @@ function expBackoff(func, options) {
         
         retryDelay && (info.retryDelay = retryDelay);
         
-        ErrorHandler.logError(previousError, info, true);
+        ErrorHandler.logError(previousError, info, {
+          asWarning: true,
+          doNotLogKnownErrors: options.doNotLogKnownErrors,
+        });
       }
       
       return response;
@@ -117,33 +119,36 @@ function expBackoff(func, options) {
       if (normalizedError === ErrorHandler.NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME && variables[0] && variables[0].value) {
         retryDelay = (new Date(variables[0].value) - new Date()) + 1000;
         
-        oldRetryDelay && options.logError && ErrorHandler.logError(error, {
+        oldRetryDelay && ErrorHandler.logError(error, {
           failReason: 'Failed after waiting '+ oldRetryDelay +'ms specified time',
           context: "Exponential Backoff",
           numberRetry: n,
           retryDelay: retryDelay,
-        }, true);
+        }, {
+          asWarning: true,
+          doNotLogKnownErrors: options.doNotLogKnownErrors,
+        });
         
         // Do not wait too long
         if (retryDelay < 32000) continue;
         
-        options.logError && ErrorHandler.logError(error, {
+        ErrorHandler.logError(error, {
           failReason: 'Retry delay > 31s',
           context: "Exponential Backoff",
           numberRetry: n,
           retryDelay: retryDelay,
-        });
+        }, {doNotLogKnownErrors: options.doNotLogKnownErrors});
         
         if (options.withSilentFailure) return null;
         throw error;
       }
       
       
-      options.logError && ErrorHandler.logError(error, {
+      ErrorHandler.logError(error, {
         failReason: 'No retry needed',
         numberRetry: n,
         context: "Exponential Backoff"
-      });
+      }, {doNotLogKnownErrors: options.doNotLogKnownErrors});
       
       if (options.withSilentFailure) return null;
       throw error;
@@ -154,11 +159,11 @@ function expBackoff(func, options) {
   
   // Action after last re-try
   if (isUrlFetchResponse) {
-    options.logError && ErrorHandler.logError(new Error(response.getContentText()), {
+    ErrorHandler.logError(new Error(response.getContentText()), {
       failReason: 'Max retries reached',
       urlFetchWithMuteHttpExceptions: true,
       context: "Exponential Backoff"
-    });
+    }, {doNotLogKnownErrors: options.doNotLogKnownErrors});
     
     return response;
   }
@@ -166,10 +171,10 @@ function expBackoff(func, options) {
   
   // Investigate on errors that are still happening after 5 retries
   // Especially error "Not Found" - does it make sense to retry on it?
-  options.logError && ErrorHandler.logError(error, {
+  ErrorHandler.logError(error, {
     failReason: 'Max retries reached',
     context: "Exponential Backoff"
-  });
+  }, {doNotLogKnownErrors: options.doNotLogKnownErrors});
   
   if (options.withSilentFailure) return null;
   throw error;
@@ -199,15 +204,23 @@ function urlFetchWithExpBackOff(url, params) {
  *
  * @param {String || Error || {lineNumber: number, fileName: string, responseCode: string}} error
  * @param {Object || {addonName: string}} [additionalParams]
- * @param {boolean} [asWarning] - default to FALSE, use console.warn instead console.error
+ * 
+ * @param {{}} [options] - default to FALSE, use console.warn instead console.error
+ * @param {boolean} options.asWarning - default to FALSE, use console.warn instead console.error
+ * @param {boolean} options.doNotLogKnownErrors - default to FALSE, if true, will not log known errors to stackdriver
  */
-function logError(error, additionalParams, asWarning) {
+function logError(error, additionalParams, options) {
+  options = options || {};
+  
   error = (typeof error === 'string') ? new Error(error) : error;
   
   // Localize error message
   var partialMatches = [];
   var normalizedMessage = ErrorHandler.getNormalizedError(error.message, partialMatches);
   var message = normalizedMessage || error.message;
+  
+  // options.doNotLogKnownErrors
+  if (options.doNotLogKnownErrors && normalizedMessage) return;
   
   var locale;
   try {
@@ -272,7 +285,7 @@ function logError(error, additionalParams, asWarning) {
   }
   
   // Send error to stackdriver log
-  if (asWarning) console.warn(log);
+  if (options.asWarning) console.warn(log);
   else console.error(log);
 }
 
