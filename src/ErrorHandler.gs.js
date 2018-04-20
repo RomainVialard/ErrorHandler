@@ -29,15 +29,32 @@
  * ErrorHandler.expBackoff(myFunction);
  *
  * @param {Function} func - The anonymous or named function to call.
- * 
- * @return {*} - The value returned by the called function.
+ *
+ * @param {{}} [options] - options for exponential backoff
+ * @param {boolean} options.withSilentFailure - default to FALSE,  If set to true, will return null on failure
+ * @param {boolean} options.logError - default to TRUE, If true, will return null on failure
+ * @param {boolean} options.verbose - default to FALSE, if true, will log a warning on a successful call that failed at least once
+ * @param {number} options.retryNumber - default to 5, maximum number of retry on error
+ *
+ * @return {* | null} - The value returned by the called function, or null on failure if withSilentFailure == true
  */
-function expBackoff(func) {
+function expBackoff(func, options) {
   
-  // execute func() then retry 5 times at most if errors
-  for (var n = 0; n < 6; n++) {
+  // enforce defaults
+  options = options || {};
+  options.logError = !('logError' in options) && true || options.logError;
+  
+  var retry = options.retryNumber || 5;
+  if (retry < 1 || retry > 6) retry = 5;
+  
+  var previousError = null;
+  var retryDelay = null;
+  var oldRetryDelay = null;
+  
+  // execute func() then retry <retry> times at most if errors
+  for (var n = 0; n < retry; n++) {
     // actual exponential backoff
-    n && Utilities.sleep((Math.pow(2, n-1) * 1000) + (Math.round(Math.random() * 1000)));
+    n && Utilities.sleep(retryDelay || (Math.pow(2, n-1) * 1000) + (Math.round(Math.random() * 1000)));
     
     var response = undefined;
     var error = undefined;
@@ -67,27 +84,69 @@ function expBackoff(func) {
     }
     
     // Return result that is not an error
-    if (noError) return response;
-    
+    if (noError) {
+      if (n && options.verbose){
+        var info = {
+          context: "Exponential Backoff",
+          successful: true,
+          numberRetry: n,
+        };
+        
+        retryDelay && (info.retryDelay = retryDelay);
+        
+        ErrorHandler.logError(previousError, info, true);
+      }
+      
+      return response;
+    }
+    previousError = error;
+    oldRetryDelay = retryDelay;
+    retryDelay = null;
     
     // Process error retry
     if (!isUrlFetchResponse && error.message) {
+      var variables = [];
+      var normalizedError = ErrorHandler.getNormalizedError(error.message, variables);
+      
       // Check for errors thrown by Google APIs on which there's no need to retry
       // eg: "Access denied by a security policy established by the administrator of your organization. 
       //      Please contact your administrator for further assistance."
-      if (error.message.indexOf('Invalid requests') !== -1
-          || error.message.indexOf('Access denied') !== -1
-          || error.message.indexOf('Mail service not enabled') !== -1) {
+      if (!ErrorHandler.NORETRY_ERRORS[normalizedError]) continue;
+      
+      // If specific error that explicitly give the retry time
+      if (normalizedError === ErrorHandler.NORMALIZED_ERROR.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME && variables[0] && variables[0].value) {
+        retryDelay = (new Date(variables[0].value) - new Date()) + 1000;
+        
+        oldRetryDelay && options.logError && ErrorHandler.logError(error, {
+          failReason: 'Failed after waiting '+ oldRetryDelay +'ms specified time',
+          context: "Exponential Backoff",
+          numberRetry: n,
+          retryDelay: retryDelay,
+        }, true);
+        
+        // Do not wait too long
+        if (retryDelay < 32000) continue;
+        
+        options.logError && ErrorHandler.logError(error, {
+          failReason: 'Retry delay > 31s',
+          context: "Exponential Backoff",
+          numberRetry: n,
+          retryDelay: retryDelay,
+        });
+        
+        if (options.withSilentFailure) return null;
         throw error;
       }
       
-      // TODO: YAMM specific ?: move to YAMM code
-      else if (error.message.indexOf('response too large') !== -1) {
-        // Thrown after calling Gmail.Users.Threads.get()
-        // maybe because a specific thread contains too many messages
-        // best to skip the thread
-        return null;
-      }
+      
+      options.logError && ErrorHandler.logError(error, {
+        failReason: 'No retry needed',
+        numberRetry: n,
+        context: "Exponential Backoff"
+      });
+      
+      if (options.withSilentFailure) return null;
+      throw error;
     }
     
   }
@@ -95,10 +154,8 @@ function expBackoff(func) {
   
   // Action after last re-try
   if (isUrlFetchResponse) {
-    
-    ErrorHandler.logError(new Error(response.getContentText()), {
-      shouldInvestigate: true,
-      failedAfter5Retries: true,
+    options.logError && ErrorHandler.logError(new Error(response.getContentText()), {
+      failReason: 'Max retries reached',
       urlFetchWithMuteHttpExceptions: true,
       context: "Exponential Backoff"
     });
@@ -106,30 +163,16 @@ function expBackoff(func) {
     return response;
   }
   
-  else {
-    // 'User-rate limit exceeded' is always followed by 'Retry after' + timestamp
-    // Maybe we should parse the timestamp to check how long we need to wait 
-    // and if we should abort or not
-    // 'User Rate Limit Exceeded' (without '-') isn't followed by 'Retry after' and it makes sense to retry
-    if (error.message && error.message.indexOf('User-rate limit exceeded') !== -1) {
-      ErrorHandler.logError(error, {
-        shouldInvestigate: true,
-        failedAfter5Retries: true,
-        context: "Exponential Backoff"
-      });
-      
-      return null;
-    }
-    
-    // Investigate on errors that are still happening after 5 retries
-    // Especially error "Not Found" - does it make sense to retry on it?
-    ErrorHandler.logError(error, {
-      failedAfter5Retries: true,
-      context: "Exponential Backoff"
-    });
-    
-    throw error;
-  }
+  
+  // Investigate on errors that are still happening after 5 retries
+  // Especially error "Not Found" - does it make sense to retry on it?
+  options.logError && ErrorHandler.logError(error, {
+    failReason: 'Max retries reached',
+    context: "Exponential Backoff"
+  });
+  
+  if (options.withSilentFailure) return null;
+  throw error;
 }
 
 /**
@@ -137,7 +180,7 @@ function expBackoff(func) {
  *
  * @param {string} url
  * @param {Object} params
- * 
+ *
  * @return {UrlFetchApp.HTTPResponse}  - fetch response
  */
 function urlFetchWithExpBackOff(url, params) {
@@ -153,17 +196,18 @@ function urlFetchWithExpBackOff(url, params) {
 /**
  * If we simply log the error object, only the error message will be submitted to Stackdriver Logging
  * Best to re-write the error as a new object to get lineNumber & stack trace
- * 
- * @param {String || Error || {lineNumber: number, fileName: string, responseCode: string}} e
+ *
+ * @param {String || Error || {lineNumber: number, fileName: string, responseCode: string}} error
  * @param {Object || {addonName: string}} [additionalParams]
+ * @param {boolean} [asWarning] - default to FALSE, use console.warn instead console.error
  */
-function logError(e, additionalParams) {
-  e = (typeof e === 'string') ? new Error(e) : e;
+function logError(error, additionalParams, asWarning) {
+  error = (typeof error === 'string') ? new Error(error) : error;
   
   // Localize error message
   var partialMatches = [];
-  var normalizedMessage = ErrorHandler.getNormalizedError(e.message, partialMatches);
-  var message = normalizedMessage || e.message;
+  var normalizedMessage = ErrorHandler.getNormalizedError(error.message, partialMatches);
+  var message = normalizedMessage || error.message;
   
   var locale;
   try {
@@ -171,13 +215,13 @@ function logError(e, additionalParams) {
   }
   catch(err) {
     // Try to add the locale
-    locale = ErrorHandler.getErrorLocale(e.message);
+    locale = ErrorHandler.getErrorLocale(error.message);
   }
   
   var log = {
     context: {
       locale: locale || '',
-      originalMessage: e.message,
+      originalMessage: error.message,
       translated: !!normalizedMessage,
     }
   };
@@ -192,30 +236,30 @@ function logError(e, additionalParams) {
     });
   }
   
-  if (e.name) {
+  if (error.name) {
     // examples of error name: Error, ReferenceError, Exception, GoogleJsonResponseException
     // would be nice to categorize
-    log.context.errorName = e.name;
-    message = e.name +": "+ message;
+    log.context.errorName = error.name;
+    message = error.name +": "+ message;
   }
   log.message = message;
   
   // Manage error Stack
-  if (e.lineNumber && e.fileName && e.stack) {
+  if (error.lineNumber && error.fileName && error.stack) {
     log.context.reportLocation = {
-      lineNumber: e.lineNumber,
-      filePath: e.fileName
+      lineNumber: error.lineNumber,
+      filePath: error.fileName
     };
     
     var addonName = additionalParams && additionalParams.addonName || undefined;
     
-    var res = ErrorHandler_._convertErrorStack(e.stack, addonName);
+    var res = ErrorHandler_._convertErrorStack(error.stack, addonName);
     log.context.reportLocation.functionName = res.lastFunctionName;
     log.message+= '\n    '+ res.stack;
   }
   
-  if (e.responseCode) {
-    log.context.responseCode = e.responseCode;
+  if (error.responseCode) {
+    log.context.responseCode = error.responseCode;
   }
   
   // Add custom information
@@ -228,19 +272,20 @@ function logError(e, additionalParams) {
   }
   
   // Send error to stackdriver log
-  console.error(log);
+  if (asWarning) console.warn(log);
+  else console.error(log);
 }
 
 
 /**
  * Return the english version of the error if listed in this library
- * 
+ *
  * @type {string} localizedErrorMessage
  * @type {Array<{
  *   variable: string,
  *   value: string
  * }>} partialMatches - Pass an empty array, getNormalizedError() will populate it with found extracted variables in case of a partial match
- * 
+ *
  * @return {ErrorHandler_.NORMALIZED_ERROR | ''} the error in English or '' if no matching error was found
  */
 function getNormalizedError(localizedErrorMessage, partialMatches) {
@@ -282,9 +327,9 @@ function getNormalizedError(localizedErrorMessage, partialMatches) {
 
 /**
  * Try to find the locale of the localized thrown error
- * 
+ *
  * @type {string} localizedErrorMessage
- * 
+ *
  * @return {string | ''} return the locale or '' if no matching error found
  */
 function getErrorLocale(localizedErrorMessage) {
@@ -316,9 +361,11 @@ function getErrorLocale(localizedErrorMessage) {
   return matcher.locale;
 }
 
+
 /**
  * @typedef {string} ErrorHandler_.NORMALIZED_ERROR
  */
+
 NORMALIZED_ERROR = {
   CONDITIONNAL_RULE_REFERENCE_DIF_SHEET: "Conditional format rule cannot reference a different sheet.",
   SERVER_ERROR_RETRY_LATER: "We're sorry, a server error occurred. Please wait a bit and try again.",
@@ -339,6 +386,12 @@ NORMALIZED_ERROR = {
   DOCUMENT_MISSING: 'Document is missing (perhaps it was deleted?)',
   USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME: 'User-rate limit exceeded. Retry after specified time.',
 };
+NORETRY_ERRORS = {};
+NORETRY_ERRORS[NORMALIZED_ERROR.INVALID_EMAIL] = true;
+NORETRY_ERRORS[NORMALIZED_ERROR.MAIL_SERVICE_NOT_ENABLED] = true;
+NORETRY_ERRORS[NORMALIZED_ERROR.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET] = true;
+NORETRY_ERRORS[NORMALIZED_ERROR.TRYING_TO_EDIT_PROTECTED_CELL] = true;
+NORETRY_ERRORS[NORMALIZED_ERROR.AUTHORIZATION_REQUIRED] = true;
 
 
 // noinspection JSUnusedGlobalSymbols, ThisExpressionReferencesGlobalObjectJS
@@ -351,6 +404,7 @@ this['ErrorHandler'] = {
   getNormalizedError: getNormalizedError,
   getErrorLocale: getErrorLocale,
   NORMALIZED_ERROR: NORMALIZED_ERROR,
+  NORETRY_ERRORS: NORETRY_ERRORS,
 };
 
 //<editor-fold desc="# Private methods">
@@ -405,7 +459,7 @@ ErrorHandler_._convertErrorStack = function (stack, addonName) {
 /**
  * Map all different error translation to their english counterpart,
  * Thanks to Google AppsScript throwing localized errors, it's impossible to easily catch them and actually do something to fix it for our users.
- * 
+ *
  * @type {Object<ErrorHandler_.ErrorMatcher>}
  */
 ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
@@ -473,7 +527,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   
   // "Backend Error"
   "Backend Error": { ref: NORMALIZED_ERROR.BACKEND_ERROR, locale: 'en'},
-    
+  
   // "Service invoked too many times for one day: email."
   "Service invoked too many times for one day: email.": { ref: NORMALIZED_ERROR.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'en'},
   "Trop d'appels pour ce service aujourd'hui : email.": { ref: NORMALIZED_ERROR.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'fr'},
@@ -516,16 +570,16 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     locale: 'it'},
   
   // User-rate limit exceeded. Retry after XXX
-  {regex: /^User-rate limit exceeded\. Retry after (.*)$/,
+  {regex: /^(?:Limit Exceeded: : )?User-rate limit exceeded\.\s+Retry after (.*Z)/,
     variables: ['timestamp'],
     ref: NORMALIZED_ERROR.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
     locale: 'en'},
-  
+
 ];
 
 /**
  * @typedef {{}} ErrorHandler_.PartialMatcher
- * 
+ *
  * @property {RegExp} regex - Regex describing the error
  * @property {Array<string>} variables - Ordered list naming the successive extracted value by the regex groups
  * @property {ErrorHandler_.NORMALIZED_ERROR} ref - Error reference
@@ -533,7 +587,7 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
  */
 /**
  * @typedef {{}} ErrorHandler_.ErrorMatcher
- * 
+ *
  * @property {ErrorHandler_.NORMALIZED_ERROR} ref - Error reference
  * @property {string} locale - Error locale
  */
