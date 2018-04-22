@@ -115,17 +115,12 @@ function expBackoff(func, options) {
       var variables = [];
       var normalizedError = ErrorHandler.getNormalizedError(error.message, variables);
       
-      // Check for errors thrown by Google APIs on which there's no need to retry
-      // eg: "Access denied by a security policy established by the administrator of your organization. 
-      //      Please contact your administrator for further assistance."
-      if (!ErrorHandler.NORETRY_ERRORS[normalizedError]) continue;
-      
       // If specific error that explicitly give the retry time
       if (normalizedError === ErrorHandler.NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME && variables[0] && variables[0].value) {
         retryDelay = (new Date(variables[0].value) - new Date()) + 1000;
         
         oldRetryDelay && ErrorHandler.logError(error, {
-          failReason: 'Failed after waiting '+ oldRetryDelay +'ms specified time',
+          failReason: 'Failed after waiting '+ oldRetryDelay +'ms',
           context: "Exponential Backoff",
           numberRetry: n,
           retryDelay: retryDelay,
@@ -148,6 +143,10 @@ function expBackoff(func, options) {
         return customError;
       }
       
+      // Check for errors thrown by Google APIs on which there's no need to retry
+      // eg: "Access denied by a security policy established by the administrator of your organization. 
+      //      Please contact your administrator for further assistance."
+      if (!ErrorHandler.NORETRY_ERRORS[normalizedError]) continue;
       
       customError = ErrorHandler.logError(error, {
         failReason: 'No retry needed',
@@ -635,3 +634,4 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
 
 
 //</editor-fold>
+  
