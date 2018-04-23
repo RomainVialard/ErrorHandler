@@ -276,8 +276,13 @@ function logError(error, additionalParams, options) {
   }
   log.message = message;
   
+  // allow to use a global variable instead of passing the addonName in each call
+  // noinspection JSUnresolvedVariable
+  var addonName = additionalParams && additionalParams.addonName || ErrorHandler_._this['SCRIPT_PROJECT_TITLE'] || '';
+  
   // Manage error Stack
   if (error.lineNumber && error.fileName && error.stack) {
+    if (addonName) error.fileName = error.fileName.replace(" (" + addonName + ")", "");
     var directLink = "https://script.google.com/macros/d/";
     directLink+= ScriptApp.getScriptId() + "/edit?f=" + error.fileName + "&s=" + error.lineNumber;
     log.context.reportLocation = {
@@ -285,8 +290,6 @@ function logError(error, additionalParams, options) {
       filePath: error.fileName,
       directLink: directLink
     };
-    
-    var addonName = additionalParams && additionalParams.addonName || undefined;
     
     var res = ErrorHandler_._convertErrorStack(error.stack, addonName);
     log.context.reportLocation.functionName = res.lastFunctionName;
@@ -482,11 +485,7 @@ ErrorHandler_._this = this;
  *   lastFunctionName: string
  * }} - formatted stack and last functionName executed
  */
-ErrorHandler_._convertErrorStack = function (stack, addonName) {
-  // allow to use a global variable instead of passing the addonName in each call
-  // noinspection JSUnresolvedVariable
-  addonName = addonName || ErrorHandler_._this['SCRIPT_PROJECT_TITLE'] || '';
-  
+ErrorHandler_._convertErrorStack = function (stack, addonName) {  
   var formattedStack = [];
   var lastFunctionName = '';
   var res;
