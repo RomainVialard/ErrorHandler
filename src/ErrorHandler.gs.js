@@ -55,7 +55,7 @@ function expBackoff(func, options) {
   var customError;
   
   // execute func() then retry <retry> times at most if errors
-  for (var n = 0; n < retry; n++) {
+  for (var n = 0; n <= retry; n++) {
     // actual exponential backoff
     n && Utilities.sleep(retryDelay || (Math.pow(2, n-1) * 1000) + (Math.round(Math.random() * 1000)));
     
@@ -278,9 +278,12 @@ function logError(error, additionalParams, options) {
   
   // Manage error Stack
   if (error.lineNumber && error.fileName && error.stack) {
+    var directLink = "https://script.google.com/macros/d/";
+    directLink+= ScriptApp.getScriptId() + "/edit?f=" + error.fileName + "&s=" + error.lineNumber;
     log.context.reportLocation = {
       lineNumber: error.lineNumber,
-      filePath: error.fileName
+      filePath: error.fileName,
+      directLink: directLink
     };
     
     var addonName = additionalParams && additionalParams.addonName || undefined;
