@@ -413,6 +413,7 @@ NORMALIZED_ERRORS = {
   EMPTY_RESPONSE: "Empty response",
   LIMIT_EXCEEDED: "Limit Exceeded: .",
   USER_RATE_LIMIT_EXCEEDED: "User Rate Limit Exceeded",
+  RATE_LIMIT_EXCEEDED: "Rate Limit Exceeded",
   NOT_FOUND: "Not Found",
   BACKEND_ERROR: "Backend Error",
   SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL: "Service invoked too many times for one day: email.",
@@ -561,8 +562,11 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Límite excedido: .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'es'},
   "Limite dépassée : .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'fr'},
   
-  // User Rate Limit Exceeded
+  // "User Rate Limit Exceeded" - eg: Gmail.Users.Threads.get
   "User Rate Limit Exceeded": { ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED, locale: 'en'},
+  
+  // "Rate Limit Exceeded" - eg: Gmail.Users.Messages.send
+  "Rate Limit Exceeded": { ref: NORMALIZED_ERRORS.RATE_LIMIT_EXCEEDED, locale: 'en'},
   
   // "Not Found"
   // with uppercase "f" when calling Gmail.Users.Messages or Gmail.Users.Drafts endpoints
