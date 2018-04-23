@@ -115,17 +115,12 @@ function expBackoff(func, options) {
       var variables = [];
       var normalizedError = ErrorHandler.getNormalizedError(error.message, variables);
       
-      // Check for errors thrown by Google APIs on which there's no need to retry
-      // eg: "Access denied by a security policy established by the administrator of your organization. 
-      //      Please contact your administrator for further assistance."
-      if (!ErrorHandler.NORETRY_ERRORS[normalizedError]) continue;
-      
       // If specific error that explicitly give the retry time
       if (normalizedError === ErrorHandler.NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME && variables[0] && variables[0].value) {
         retryDelay = (new Date(variables[0].value) - new Date()) + 1000;
         
         oldRetryDelay && ErrorHandler.logError(error, {
-          failReason: 'Failed after waiting '+ oldRetryDelay +'ms specified time',
+          failReason: 'Failed after waiting '+ oldRetryDelay +'ms',
           context: "Exponential Backoff",
           numberRetry: n,
           retryDelay: retryDelay,
@@ -148,6 +143,10 @@ function expBackoff(func, options) {
         return customError;
       }
       
+      // Check for errors thrown by Google APIs on which there's no need to retry
+      // eg: "Access denied by a security policy established by the administrator of your organization. 
+      //      Please contact your administrator for further assistance."
+      if (!ErrorHandler.NORETRY_ERRORS[normalizedError]) continue;
       
       customError = ErrorHandler.logError(error, {
         failReason: 'No retry needed',
@@ -421,6 +420,8 @@ NORMALIZED_ERRORS = {
   UNABLE_TO_TALK_TO_TRIGGER_SERVICE: "Unable to talk to trigger service",
   MAIL_SERVICE_NOT_ENABLED: "Mail service not enabled",
   INVALID_THREAD_ID_VALUE: "Invalid thread_id value",
+  LABEL_ID_NOT_FOUND: "labelId not found",
+  LABEL_NAME_EXISTS_OR_CONFLICTS: "Label name exists or conflicts",
   
   // Partial match error
   INVALID_EMAIL: 'Invalid email',
@@ -564,7 +565,10 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "User Rate Limit Exceeded": { ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED, locale: 'en'},
   
   // "Not Found"
+  // with uppercase "f" when calling Gmail.Users.Messages or Gmail.Users.Drafts endpoints
   "Not Found": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'en'},
+  // with lowercase "f" when calling Gmail.Users.Threads endpoint
+  "Not found": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'en'},
   
   // "Backend Error"
   "Backend Error": { ref: NORMALIZED_ERRORS.BACKEND_ERROR, locale: 'en'},
@@ -588,6 +592,12 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   
   // "Invalid thread_id value"
   "Invalid thread_id value": { ref: NORMALIZED_ERRORS.INVALID_THREAD_ID_VALUE, locale: 'en'},
+  
+  // "labelId not found"
+  "labelId not found": { ref: NORMALIZED_ERRORS.LABEL_ID_NOT_FOUND, locale: 'en'},
+  
+  // "Label name exists or conflicts"
+  "Label name exists or conflicts": { ref: NORMALIZED_ERRORS.LABEL_NAME_EXISTS_OR_CONFLICTS, locale: 'en'},
 };
 
 /**
@@ -635,3 +645,4 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
 
 
 //</editor-fold>
+  
