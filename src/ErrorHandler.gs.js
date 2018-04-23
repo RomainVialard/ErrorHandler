@@ -426,11 +426,13 @@ NORMALIZED_ERRORS = {
   INVALID_THREAD_ID_VALUE: "Invalid thread_id value",
   LABEL_ID_NOT_FOUND: "labelId not found",
   LABEL_NAME_EXISTS_OR_CONFLICTS: "Label name exists or conflicts",
+  NO_RECIPIENT: "Failed to send email: no recipient",
   
   // Partial match error
   INVALID_EMAIL: 'Invalid email',
   DOCUMENT_MISSING: 'Document is missing (perhaps it was deleted?)',
   USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME: 'User-rate limit exceeded. Retry after specified time.',
+  INVALID_ARGUMENT: 'Invalid argument',
 };
 NORETRY_ERRORS = {};
 NORETRY_ERRORS[NORMALIZED_ERRORS.INVALID_EMAIL] = true;
@@ -438,6 +440,8 @@ NORETRY_ERRORS[NORMALIZED_ERRORS.MAIL_SERVICE_NOT_ENABLED] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.INVALID_ARGUMENT] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.NO_RECIPIENT] = true;
 
 
 // noinspection JSUnusedGlobalSymbols, ThisExpressionReferencesGlobalObjectJS
@@ -535,6 +539,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "A regra de formatação condicional não pode fazer referência a uma página diferente.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'pt'},
   "Правило умовного форматування не може посилатися на інший аркуш.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'uk'},
   "لا يمكن أن تشير الصيغة الشرطية إلى ورقة مختلفة.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ar_sa'},
+  "Ο κανόνας μορφής υπό συνθήκες δεν μπορεί να αναφέρεται σε διαφορετικό φύλλο.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'el'},
   
   // "We're sorry, a server error occurred. Please wait a bit and try again."
   "We're sorry, a server error occurred. Please wait a bit and try again.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'en'},
@@ -547,9 +552,12 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Infelizmente ocorreu um erro do servidor. Espere um momento e tente novamente.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'pt'},
   "Sajnáljuk, szerverhiba történt. Kérjük, várjon egy kicsit, majd próbálkozzon újra.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'hu'},
   "Ett serverfel uppstod. Vänta lite och försök igen.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'sv'},
+  "A apărut o eroare de server. Așteptați puțin și încercați din nou.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'ro'},
+  "Ein Serverfehler ist aufgetreten. Bitte versuchen Sie es später erneut.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'de'},
   
   // "Authorization is required to perform that action. Please run the script again to authorize it."
   "Authorization is required to perform that action. Please run the script again to authorize it.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'en'},
+  "Autorisation requise pour exécuter cette action. Exécutez à nouveau le script pour autoriser cette action.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'fr'},
   "Cần được cho phép để thực hiện tác vụ đó. Hãy chạy lại tập lệnh để cho phép tác vụ.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'vi'},
   
   // "Empty response"
@@ -605,6 +613,16 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   
   // "Label name exists or conflicts"
   "Label name exists or conflicts": { ref: NORMALIZED_ERRORS.LABEL_NAME_EXISTS_OR_CONFLICTS, locale: 'en'},
+  
+  // "Invalid to header" - eg: Gmail.Users.Messages.send
+  "Invalid to header": { ref: NORMALIZED_ERRORS.INVALID_EMAIL, locale: 'en'},
+  
+  // "Invalid cc header" - eg: Gmail.Users.Messages.send
+  "Invalid cc header": { ref: NORMALIZED_ERRORS.INVALID_EMAIL, locale: 'en'},  
+  
+  // "Failed to send email: no recipient" - eg: GmailApp.sendEmail()
+  "Failed to send email: no recipient": { ref: NORMALIZED_ERRORS.NO_RECIPIENT, locale: 'en'},  
+    
 };
 
 /**
@@ -632,7 +650,12 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['timestamp'],
     ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
     locale: 'en'},
-
+  
+  // "Invalid argument: XXX" - wrong email alias used - eg: GmailApp.sendEmail()
+  {regex: /^Invalid argument: (.*)$/,
+    variables: ['email'],
+    ref: NORMALIZED_ERRORS.INVALID_ARGUMENT,
+    locale: 'en'},
 ];
 
 /**
