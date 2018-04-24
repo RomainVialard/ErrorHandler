@@ -55,7 +55,7 @@ function expBackoff(func, options) {
   var customError;
   
   // execute func() then retry <retry> times at most if errors
-  for (var n = 0; n < retry; n++) {
+  for (var n = 0; n <= retry; n++) {
     // actual exponential backoff
     n && Utilities.sleep(retryDelay || (Math.pow(2, n-1) * 1000) + (Math.round(Math.random() * 1000)));
     
@@ -242,8 +242,10 @@ function logError(error, additionalParams, options) {
   var message = normalizedMessage || error.message;
   
   var locale;
+  var scriptId;
   try {
     locale = Session.getActiveUserLocale();
+    scriptId = ScriptApp.getScriptId();
   }
   catch(err) {
     // Try to add the locale
@@ -276,14 +278,17 @@ function logError(error, additionalParams, options) {
   }
   log.message = message;
   
+  // allow to use a global variable instead of passing the addonName in each call
+  // noinspection JSUnresolvedVariable
+  var addonName = additionalParams && additionalParams.addonName || ErrorHandler_._this['SCRIPT_PROJECT_TITLE'] || '';
+  
   // Manage error Stack
   if (error.lineNumber && error.fileName && error.stack) {
     log.context.reportLocation = {
       lineNumber: error.lineNumber,
-      filePath: error.fileName
+      filePath: addonName && error.fileName.replace(' ('+ addonName +')', '') || error.fileName,
+      directLink: 'https://script.google.com/macros/d/'+ scriptId +'/edit?f='+ error.fileName +'&s='+ error.lineNumber
     };
-    
-    var addonName = additionalParams && additionalParams.addonName || undefined;
     
     var res = ErrorHandler_._convertErrorStack(error.stack, addonName);
     log.context.reportLocation.functionName = res.lastFunctionName;
@@ -406,6 +411,9 @@ function getErrorLocale(localizedErrorMessage) {
  * @typedef {string} ErrorHandler_.NORMALIZED_ERROR
  */
 
+/**
+ * List all known Errors
+ */
 NORMALIZED_ERRORS = {
   CONDITIONNAL_RULE_REFERENCE_DIF_SHEET: "Conditional format rule cannot reference a different sheet.",
   SERVER_ERROR_RETRY_LATER: "We're sorry, a server error occurred. Please wait a bit and try again.",
@@ -423,18 +431,30 @@ NORMALIZED_ERRORS = {
   INVALID_THREAD_ID_VALUE: "Invalid thread_id value",
   LABEL_ID_NOT_FOUND: "labelId not found",
   LABEL_NAME_EXISTS_OR_CONFLICTS: "Label name exists or conflicts",
+  NO_RECIPIENT: "Failed to send email: no recipient",
   
   // Partial match error
   INVALID_EMAIL: 'Invalid email',
   DOCUMENT_MISSING: 'Document is missing (perhaps it was deleted?)',
   USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME: 'User-rate limit exceeded. Retry after specified time.',
+  INVALID_ARGUMENT: 'Invalid argument',
+  SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME: 'A sheet with this name already exists. Please enter another name.',
 };
+
+/**
+ * List all error for which retrying will not make the call succeed
+ */
 NORETRY_ERRORS = {};
 NORETRY_ERRORS[NORMALIZED_ERRORS.INVALID_EMAIL] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.MAIL_SERVICE_NOT_ENABLED] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.NO_RECIPIENT] = true;
+
 NORETRY_ERRORS[NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME] = true;
+
 NORETRY_ERRORS[NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.INVALID_ARGUMENT] = true;
 
 
 // noinspection JSUnusedGlobalSymbols, ThisExpressionReferencesGlobalObjectJS
@@ -473,11 +493,7 @@ ErrorHandler_._this = this;
  *   lastFunctionName: string
  * }} - formatted stack and last functionName executed
  */
-ErrorHandler_._convertErrorStack = function (stack, addonName) {
-  // allow to use a global variable instead of passing the addonName in each call
-  // noinspection JSUnresolvedVariable
-  addonName = addonName || ErrorHandler_._this['SCRIPT_PROJECT_TITLE'] || '';
-  
+ErrorHandler_._convertErrorStack = function (stack, addonName) {  
   var formattedStack = [];
   var lastFunctionName = '';
   var res;
@@ -512,6 +528,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "La regla de formato condicional no puede hacer referencia a una hoja diferente.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'es'},
   "La regola di formattazione condizionale non può contenere un riferimento a un altro foglio.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'it'},
   "La règle de mise en forme conditionnelle ne doit pas faire référence à une autre feuille.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'fr'},
+  "Une règle de mise en forme conditionnelle ne peut pas faire référence à une autre feuille.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'fr_ca'},
   "Die Regel für eine bedingte Formatierung darf sich nicht auf ein anderes Tabellenblatt beziehen.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'de'},
   "Правило условного форматирования не может ссылаться на другой лист.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ru'},
   "조건부 서식 규칙은 다른 시트를 참조할 수 없습니다.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ko'},
@@ -532,6 +549,8 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "A regra de formatação condicional não pode fazer referência a uma página diferente.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'pt'},
   "Правило умовного форматування не може посилатися на інший аркуш.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'uk'},
   "لا يمكن أن تشير الصيغة الشرطية إلى ورقة مختلفة.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ar_sa'},
+  "Ο κανόνας μορφής υπό συνθήκες δεν μπορεί να αναφέρεται σε διαφορετικό φύλλο.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'el'},
+  "En betinget formateringsregel kan ikke referere til et annet ark.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'no'},
   
   // "We're sorry, a server error occurred. Please wait a bit and try again."
   "We're sorry, a server error occurred. Please wait a bit and try again.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'en'},
@@ -539,14 +558,18 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Une erreur est survenue sur le serveur. Nous vous prions de nous en excuser et vous invitons à réessayer ultérieurement.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'fr'},
   "Xin lỗi bạn, máy chủ đã gặp lỗi. Vui lòng chờ một lát và thử lại.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'vi'},
   "Lo sentimos, se ha producido un error en el servidor. Espera un momento y vuelve a intentarlo.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'es'},
+  "Lo sentimos, se produjo un error en el servidor. Aguarde un momento e inténtelo de nuevo.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'es_419'},
   "ขออภัย มีข้อผิดพลาดของเซิร์ฟเวอร์เกิดขึ้น โปรดรอสักครู่แล้วลองอีกครั้ง": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'th'},
   "很抱歉，伺服器發生錯誤，請稍後再試。": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'zh_tw'},
   "Infelizmente ocorreu um erro do servidor. Espere um momento e tente novamente.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'pt'},
   "Sajnáljuk, szerverhiba történt. Kérjük, várjon egy kicsit, majd próbálkozzon újra.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'hu'},
   "Ett serverfel uppstod. Vänta lite och försök igen.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'sv'},
+  "A apărut o eroare de server. Așteptați puțin și încercați din nou.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'ro'},
+  "Ein Serverfehler ist aufgetreten. Bitte versuchen Sie es später erneut.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'de'},
   
   // "Authorization is required to perform that action. Please run the script again to authorize it."
   "Authorization is required to perform that action. Please run the script again to authorize it.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'en'},
+  "Autorisation requise pour exécuter cette action. Exécutez à nouveau le script pour autoriser cette action.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'fr'},
   "Cần được cho phép để thực hiện tác vụ đó. Hãy chạy lại tập lệnh để cho phép tác vụ.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'vi'},
   
   // "Empty response"
@@ -586,6 +609,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit."
   "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'en'},
   "保護されているセルやオブジェクトを編集しようとしています。編集する必要がある場合は、スプレッドシートのオーナーに連絡して保護を解除してもらってください。": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'ja'},
+  "Estás intentando editar una celda o un objeto protegidos. Ponte en contacto con el propietario de la hoja de cálculo para desprotegerla si es necesario modificarla.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'es'},
   
   // "Unable to talk to trigger service"
   "Unable to talk to trigger service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'en'},
@@ -602,6 +626,17 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   
   // "Label name exists or conflicts"
   "Label name exists or conflicts": { ref: NORMALIZED_ERRORS.LABEL_NAME_EXISTS_OR_CONFLICTS, locale: 'en'},
+  
+  // "Invalid to header" - eg: Gmail.Users.Messages.send
+  "Invalid to header": { ref: NORMALIZED_ERRORS.INVALID_EMAIL, locale: 'en'},
+  // "Invalid cc header" - eg: Gmail.Users.Messages.send
+  "Invalid cc header": { ref: NORMALIZED_ERRORS.INVALID_EMAIL, locale: 'en'},  
+  
+  // "Failed to send email: no recipient" - eg: GmailApp.sendEmail()
+  "Failed to send email: no recipient": { ref: NORMALIZED_ERRORS.NO_RECIPIENT, locale: 'en'},
+  // "Recipient address required" - eg: Gmail.Users.Messages.send()
+  "Recipient address required": { ref: NORMALIZED_ERRORS.NO_RECIPIENT, locale: 'en'},
+  
 };
 
 /**
@@ -629,7 +664,23 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['timestamp'],
     ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
     locale: 'en'},
-
+  
+  // "Invalid argument: XXX" - wrong email alias used - eg: GmailApp.sendEmail()
+  {regex: /^Invalid argument: (.*)$/,
+    variables: ['email'],
+    ref: NORMALIZED_ERRORS.INVALID_ARGUMENT,
+    locale: 'en'},
+  
+  // "A sheet with the name "XXX" already exists. Please enter another name." - eg: [Sheet].setName()
+  {regex: /^A sheet with the name "([^"]*)" already exists\. Please enter another name\.$/,
+    variables: ['sheetName'],
+    ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
+    locale: 'en'},
+  {regex: /^Ya existe una hoja con el nombre "([^"]*)"\. Ingresa otro\.$/,
+    variables: ['sheetName'],
+    ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
+    locale: 'es_419'},
+  
 ];
 
 /**
