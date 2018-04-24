@@ -242,8 +242,10 @@ function logError(error, additionalParams, options) {
   var message = normalizedMessage || error.message;
   
   var locale;
+  var scriptId;
   try {
     locale = Session.getActiveUserLocale();
+    scriptId = ScriptApp.getScriptId();
   }
   catch(err) {
     // Try to add the locale
@@ -282,13 +284,10 @@ function logError(error, additionalParams, options) {
   
   // Manage error Stack
   if (error.lineNumber && error.fileName && error.stack) {
-    if (addonName) error.fileName = error.fileName.replace(" (" + addonName + ")", "");
-    var directLink = "https://script.google.com/macros/d/";
-    directLink+= ScriptApp.getScriptId() + "/edit?f=" + error.fileName + "&s=" + error.lineNumber;
     log.context.reportLocation = {
       lineNumber: error.lineNumber,
-      filePath: error.fileName,
-      directLink: directLink
+      filePath: addonName && error.fileName.replace(' ('+ addonName +')', '') || error.fileName,
+      directLink: 'https://script.google.com/macros/d/'+ scriptId +'/edit?f='+ error.fileName +'&s='+ error.lineNumber
     };
     
     var res = ErrorHandler_._convertErrorStack(error.stack, addonName);
@@ -412,6 +411,9 @@ function getErrorLocale(localizedErrorMessage) {
  * @typedef {string} ErrorHandler_.NORMALIZED_ERROR
  */
 
+/**
+ * List all known Errors
+ */
 NORMALIZED_ERRORS = {
   CONDITIONNAL_RULE_REFERENCE_DIF_SHEET: "Conditional format rule cannot reference a different sheet.",
   SERVER_ERROR_RETRY_LATER: "We're sorry, a server error occurred. Please wait a bit and try again.",
@@ -438,15 +440,21 @@ NORMALIZED_ERRORS = {
   INVALID_ARGUMENT: 'Invalid argument',
   SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME: 'A sheet with this name already exists. Please enter another name.',
 };
+
+/**
+ * List all error for which retrying will not make the call succeed
+ */
 NORETRY_ERRORS = {};
 NORETRY_ERRORS[NORMALIZED_ERRORS.INVALID_EMAIL] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.MAIL_SERVICE_NOT_ENABLED] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.NO_RECIPIENT] = true;
+
 NORETRY_ERRORS[NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME] = true;
+
 NORETRY_ERRORS[NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.INVALID_ARGUMENT] = true;
-NORETRY_ERRORS[NORMALIZED_ERRORS.NO_RECIPIENT] = true;
-NORETRY_ERRORS[NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME] = true;
 
 
 // noinspection JSUnusedGlobalSymbols, ThisExpressionReferencesGlobalObjectJS
