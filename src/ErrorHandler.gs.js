@@ -34,7 +34,7 @@
  * @param {Function} func - The anonymous or named function to call.
  *
  * @param {{}} [options] - options for exponential backoff
- * @param {boolean} options.throwOnFailure - default to FALSE,  If true, throw the ErrorHandler_.CustomError on failure
+ * @param {boolean} options.throwOnFailure - default to FALSE, if true, throw the ErrorHandler_.CustomError on failure
  * @param {boolean} options.doNotLogKnownErrors - default to FALSE, if true, will not log known errors to stackdriver
  * @param {boolean} options.verbose - default to FALSE, if true, will log a warning on a successful call that failed at least once
  * @param {number} options.retryNumber - default to 5, maximum number of retry on error
@@ -212,8 +212,9 @@ function urlFetchWithExpBackOff(url, params) {
  *   variables: Array<{}>,
  *   errorName: string,
  *   reportLocation: {
- *     lineNumber: number
+ *     lineNumber: number,
  *     filePath: string,
+ *     directLink: string,
  *   },
  * }} context
  */
@@ -225,7 +226,7 @@ function urlFetchWithExpBackOff(url, params) {
  * @param {String || Error || {lineNumber: number, fileName: string, responseCode: string}} error
  * @param {Object || {addonName: string}} [additionalParams]
  *
- * @param {{}} [options] - default to FALSE, use console.warn instead console.error
+ * @param {{}} [options] - Options for logError
  * @param {boolean} options.asWarning - default to FALSE, use console.warn instead console.error
  * @param {boolean} options.doNotLogKnownErrors - default to FALSE, if true, will not log known errors to stackdriver
  *
@@ -284,10 +285,12 @@ function logError(error, additionalParams, options) {
   
   // Manage error Stack
   if (error.lineNumber && error.fileName && error.stack) {
+    var fileName = addonName && error.fileName.replace(' ('+ addonName +')', '') || error.fileName;
+    
     log.context.reportLocation = {
       lineNumber: error.lineNumber,
-      filePath: addonName && error.fileName.replace(' ('+ addonName +')', '') || error.fileName,
-      directLink: 'https://script.google.com/macros/d/'+ scriptId +'/edit?f='+ error.fileName +'&s='+ error.lineNumber
+      filePath: fileName,
+      directLink: 'https://script.google.com/macros/d/'+ scriptId +'/edit?f='+ fileName +'&s='+ error.lineNumber
     };
     
     var res = ErrorHandler_._convertErrorStack(error.stack, addonName);
@@ -329,7 +332,7 @@ function logError(error, additionalParams, options) {
  * @type {Array<{
  *   variable: string,
  *   value: string
- * }>} partialMatches - Pass an empty array, getNormalizedError() will populate it with found extracted variables in case of a partial match
+ * }>} [partialMatches] - Pass an empty array, getNormalizedError() will populate it with found extracted variables in case of a partial match
  *
  * @return {ErrorHandler_.NORMALIZED_ERROR | ''} the error in English or '' if no matching error was found
  */
@@ -360,11 +363,12 @@ function getNormalizedError(localizedErrorMessage, partialMatches) {
   if (!match) return '';
   
   // Extract partial match variables
-  for (var j = 0, variable; variable = matcher.variables[j] ; j++) {
-    partialMatches.push({
-      variable: variable,
-      value: match[j+1] !== undefined && match[j+1] || ''
-    });
+  if (partialMatches && Array.isArray(partialMatches)) {
+    for (var j = 0, variable; variable = matcher.variables[j]; j++) {
+      partialMatches.push({
+        variable: variable, value: match[j + 1] !== undefined && match[j + 1] || ''
+      });
+    }
   }
   
   return matcher.ref;
