@@ -555,6 +555,8 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "لا يمكن أن تشير الصيغة الشرطية إلى ورقة مختلفة.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ar_sa'},
   "Ο κανόνας μορφής υπό συνθήκες δεν μπορεί να αναφέρεται σε διαφορετικό φύλλο.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'el'},
   "En betinget formateringsregel kan ikke referere til et annet ark.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'no'},
+  "Koşullu biçimlendirme kuralı farklı bir sayfaya başvuramaz.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'tr'},
+  "Pravilo pogojnega oblikovanja se ne more sklicevati na drug list.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'sl'},
   
   // "We're sorry, a server error occurred. Please wait a bit and try again."
   "We're sorry, a server error occurred. Please wait a bit and try again.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'en'},
