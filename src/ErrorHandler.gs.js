@@ -452,6 +452,7 @@ NORETRY_ERRORS = {};
 NORETRY_ERRORS[NORMALIZED_ERRORS.INVALID_EMAIL] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.MAIL_SERVICE_NOT_ENABLED] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.NO_RECIPIENT] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL] = true;
 
 NORETRY_ERRORS[NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL] = true;
@@ -538,6 +539,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "조건부 서식 규칙은 다른 시트를 참조할 수 없습니다.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ko'},
   "條件式格式規則無法參照其他工作表。": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'zh_tw'},
   "条件格式规则无法引用其他工作表。": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'zh_cn'},
+  "條件格式規則無法參照其他工作表。": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'zh_hk'},
   "条件付き書式ルールで別のシートを参照することはできません。": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ja'},
   "Pravidlo podmíněného formátu nemůže odkazovat na jiný list.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'cs'},
   "Nosacījumformāta kārtulai nevar būt atsauce uz citu lapu.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'lv'},
@@ -557,6 +559,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "En betinget formateringsregel kan ikke referere til et annet ark.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'no'},
   "Koşullu biçimlendirme kuralı farklı bir sayfaya başvuramaz.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'tr'},
   "Pravilo pogojnega oblikovanja se ne more sklicevati na drug list.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'sl'},
+  "Hindi maaaring mag-reference ng ibang sheet ang conditional format rule.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'fil'},
   
   // "We're sorry, a server error occurred. Please wait a bit and try again."
   "We're sorry, a server error occurred. Please wait a bit and try again.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'en'},
@@ -610,6 +613,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Service invoked too many times for one day: email.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'en'},
   "Trop d'appels pour ce service aujourd'hui : email.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'fr'},
   "Servicio solicitado demasiadas veces en un mismo día: gmail.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'es'},
+  "Servicio solicitado demasiadas veces en un mismo día: email.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'es'},
   "Serviço chamado muitas vezes no mesmo dia: email.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'pt'},
   
   // "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit."
