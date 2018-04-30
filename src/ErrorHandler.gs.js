@@ -430,6 +430,7 @@ NORMALIZED_ERRORS = {
   BACKEND_ERROR: "Backend Error",
   SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL: "Service invoked too many times for one day: email.",
   TRYING_TO_EDIT_PROTECTED_CELL: "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.",
+  NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND: "No item with the given ID could be found, or you do not have permission to access it.",
   UNABLE_TO_TALK_TO_TRIGGER_SERVICE: "Unable to talk to trigger service",
   MAIL_SERVICE_NOT_ENABLED: "Mail service not enabled",
   INVALID_THREAD_ID_VALUE: "Invalid thread_id value",
@@ -560,6 +561,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Koşullu biçimlendirme kuralı farklı bir sayfaya başvuramaz.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'tr'},
   "Pravilo pogojnega oblikovanja se ne more sklicevati na drug list.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'sl'},
   "Hindi maaaring mag-reference ng ibang sheet ang conditional format rule.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'fil'},
+  "En betinget formatregel kan ikke henvise til et andet ark.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'da'},
   
   // "We're sorry, a server error occurred. Please wait a bit and try again."
   "We're sorry, a server error occurred. Please wait a bit and try again.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'en'},
@@ -621,6 +623,9 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "保護されているセルやオブジェクトを編集しようとしています。編集する必要がある場合は、スプレッドシートのオーナーに連絡して保護を解除してもらってください。": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'ja'},
   "Estás intentando editar una celda o un objeto protegidos. Ponte en contacto con el propietario de la hoja de cálculo para desprotegerla si es necesario modificarla.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'es'},
   
+  // "No item with the given ID could be found, or you do not have permission to access it."
+  "No item with the given ID could be found, or you do not have permission to access it.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'en'},
+  
   // "Unable to talk to trigger service"
   "Unable to talk to trigger service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'en'},
   "Impossible de communiquer pour déclencher le service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'fr'},
@@ -658,6 +663,14 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['email'],
     ref: NORMALIZED_ERRORS.INVALID_EMAIL,
     locale: 'en'},
+  {regex: /^El correo electrónico no es válido: (.*)$/,
+    variables: ['email'],
+    ref: NORMALIZED_ERRORS.INVALID_EMAIL,
+    locale: 'es'},
+  {regex: /^無效的電子郵件：(.*)$/,
+    variables: ['email'],
+    ref: NORMALIZED_ERRORS.INVALID_EMAIL,
+    locale: 'zh_TW'},
   
   // Document XXX is missing (perhaps it was deleted?)
   {regex: /^Document (\S*) is missing \(perhaps it was deleted\?\)$/,
