@@ -563,6 +563,11 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Pravilo pogojnega oblikovanja se ne more sklicevati na drug list.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'sl'},
   "Hindi maaaring mag-reference ng ibang sheet ang conditional format rule.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'fil'},
   "En betinget formatregel kan ikke henvise til et andet ark.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'da'},
+  "כלל של פורמט מותנה לא יכול לכלול הפניה לגיליון אחר.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'iw'},
+  "Formatu baldintzatuaren arauak ezin dio egin erreferentzia beste orri bati.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'eu'},
+  "Sąlyginio formato taisyklė negali nurodyti kito lapo.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'lt'},
+  "Regula cu format condiționat nu poate face referire la altă foaie.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ro'},
+  "Tingimusvormingu reegel ei saa viidata teisele lehele.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'et'},
   
   // "We're sorry, a server error occurred. Please wait a bit and try again."
   "We're sorry, a server error occurred. Please wait a bit and try again.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'en'},
@@ -617,15 +622,29 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Trop d'appels pour ce service aujourd'hui : email.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'fr'},
   "Servicio solicitado demasiadas veces en un mismo día: gmail.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'es'},
   "Servicio solicitado demasiadas veces en un mismo día: email.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'es'},
-  "Serviço chamado muitas vezes no mesmo dia: email.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'pt'},
+  "Serviço chamado muitas vezes no mesmo dia: email.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'pt'},  
   
   // "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit."
   "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'en'},
   "保護されているセルやオブジェクトを編集しようとしています。編集する必要がある場合は、スプレッドシートのオーナーに連絡して保護を解除してもらってください。": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'ja'},
   "Estás intentando editar una celda o un objeto protegidos. Ponte en contacto con el propietario de la hoja de cálculo para desprotegerla si es necesario modificarla.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'es'},
+  "Vous tentez de modifier une cellule ou un objet protégés. Si vous avez besoin d'effectuer cette modification, demandez au propriétaire de la feuille de calcul de supprimer la protection.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'fr'},
   
   // "No item with the given ID could be found, or you do not have permission to access it."
   "No item with the given ID could be found, or you do not have permission to access it.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'en'},
+  "Không tìm thấy mục nào có ID đã cung cấp hoặc bạn không có quyền truy cập vào mục đó.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'vi'},
+  "No se ha encontrado ningún elemento con el ID proporcionado o no tienes permiso para acceder a él.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'es'},
+  "No se ha encontrado ningún elemento con la ID proporcionada o no tienes permiso para acceder a él.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'es_419'},
+  "Nessun elemento trovato con l'ID specificato o non disponi di autorizzazioni per accedervi.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'it'},
+  "Det gick inte att hitta någon post med angivet ID eller så saknar du behörighet för att få åtkomst till den.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'sv'},
+  "Er is geen item met de opgegeven id gevonden of je hebt geen toestemming om het item te openen.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'nl'},
+  "Nenhum item com o ID fornecido foi encontrado ou você não tem permissão para acessá-lo.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'pt'},
+  "Impossible de trouver l'élément correspondant à cet identifiant. Vous n'êtes peut-être pas autorisé à y accéder.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'fr'},
+  "No s'ha trobat cap element amb aquest identificador o no teniu permís per accedir-hi.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'ca'},
+  "Элемент с заданным кодом не найден или у вас нет прав доступа к нему.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'ru'},
+  "Nebyly nalezeny žádné položky se zadaným ID nebo nemáte oprávnění k nim přistupovat.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'cs'},
+  "Item dengan ID yang diberikan tidak dapat ditemukan atau Anda tidak memiliki izin untuk mengaksesnya.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'in'},
+  "指定された ID のアイテムは見つからなかったか、アクセスする権限がありません。": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'ja'},
   
   // "Unable to talk to trigger service"
   "Unable to talk to trigger service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'en'},
@@ -672,7 +691,11 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['email'],
     ref: NORMALIZED_ERRORS.INVALID_EMAIL,
     locale: 'zh_TW'},
-  
+  {regex: /^E-mail incorrect : (.*)$/,
+    variables: ['email'],
+    ref: NORMALIZED_ERRORS.INVALID_EMAIL,
+    locale: 'fr'},
+    
   // Document XXX is missing (perhaps it was deleted?)
   {regex: /^Document (\S*) is missing \(perhaps it was deleted\?\)$/,
     variables: ['docId'],
@@ -682,7 +705,11 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
     locale: 'it'},
-  
+  {regex: /^Tài liệu (\S*) bị thiếu \(có thể tài liệu đã bị xóa\?\)$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
+    locale: 'vi'},
+    
   // User-rate limit exceeded. Retry after XXX
   {regex: /^(?:Limit Exceeded: : )?User-rate limit exceeded\.\s+Retry after (.*Z)/,
     variables: ['timestamp'],
