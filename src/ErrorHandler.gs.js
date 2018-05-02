@@ -224,7 +224,7 @@ function urlFetchWithExpBackOff(url, params) {
  * Best to re-write the error as a new object to get lineNumber & stack trace
  *
  * @param {String || Error || {lineNumber: number, fileName: string, responseCode: string}} error
- * @param {Object || {addonName: string}} [additionalParams]
+ * @param {Object || {addonName: string, versionNumber: number}} [additionalParams]
  *
  * @param {{}} [options] - Options for logError
  * @param {boolean} options.asWarning - default to FALSE, use console.warn instead console.error
@@ -300,6 +300,15 @@ function logError(error, additionalParams, options) {
   
   if (error.responseCode) {
     log.context.responseCode = error.responseCode;
+  }
+  
+  // allow to use a global variable instead of passing the addonName in each call
+  // noinspection JSUnresolvedVariable
+  var versionNumber = additionalParams && additionalParams.versionNumber || ErrorHandler_._this['SCRIPT_VERSION_DEPLOYED'] || '';
+  if (versionNumber) {
+    log.serviceContext = {
+      version: versionNumber
+    };
   }
   
   // Add custom information
