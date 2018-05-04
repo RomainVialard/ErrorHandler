@@ -224,7 +224,7 @@ function urlFetchWithExpBackOff(url, params) {
  * Best to re-write the error as a new object to get lineNumber & stack trace
  *
  * @param {String || Error || {lineNumber: number, fileName: string, responseCode: string}} error
- * @param {Object || {addonName: string}} [additionalParams]
+ * @param {Object || {addonName: string, versionNumber: number}} [additionalParams]
  *
  * @param {{}} [options] - Options for logError
  * @param {boolean} options.asWarning - default to FALSE, use console.warn instead console.error
@@ -300,6 +300,15 @@ function logError(error, additionalParams, options) {
   
   if (error.responseCode) {
     log.context.responseCode = error.responseCode;
+  }
+  
+  // allow to use a global variable instead of passing the addonName in each call
+  // noinspection JSUnresolvedVariable
+  var versionNumber = additionalParams && additionalParams.versionNumber || ErrorHandler_._this['SCRIPT_VERSION_DEPLOYED'] || '';
+  if (versionNumber) {
+    log.serviceContext = {
+      version: versionNumber
+    };
   }
   
   // Add custom information
@@ -423,7 +432,9 @@ NORMALIZED_ERRORS = {
   SERVER_ERROR_RETRY_LATER: "We're sorry, a server error occurred. Please wait a bit and try again.",
   AUTHORIZATION_REQUIRED: "Authorization is required to perform that action. Please run the script again to authorize it.",
   EMPTY_RESPONSE: "Empty response",
+  BAD_VALUE: "Bad value",
   LIMIT_EXCEEDED: "Limit Exceeded: .",
+  LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE: "Limit Exceeded: Email Recipients Per Message.",
   USER_RATE_LIMIT_EXCEEDED: "User Rate Limit Exceeded",
   RATE_LIMIT_EXCEEDED: "Rate Limit Exceeded",
   NOT_FOUND: "Not Found",
@@ -431,13 +442,15 @@ NORMALIZED_ERRORS = {
   SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL: "Service invoked too many times for one day: email.",
   TRYING_TO_EDIT_PROTECTED_CELL: "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.",
   NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND: "No item with the given ID could be found, or you do not have permission to access it.",
+  NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT: "You do not have permissions to access the requested document.",
   UNABLE_TO_TALK_TO_TRIGGER_SERVICE: "Unable to talk to trigger service",
   MAIL_SERVICE_NOT_ENABLED: "Mail service not enabled",
   INVALID_THREAD_ID_VALUE: "Invalid thread_id value",
   LABEL_ID_NOT_FOUND: "labelId not found",
   LABEL_NAME_EXISTS_OR_CONFLICTS: "Label name exists or conflicts",
   NO_RECIPIENT: "Failed to send email: no recipient",
-  
+  IMAP_FEATURES_DISABLED_BY_ADMIN: "IMAP features disabled by administrator",
+    
   // Partial match error
   INVALID_EMAIL: 'Invalid email',
   DOCUMENT_MISSING: 'Document is missing (perhaps it was deleted?)',
@@ -453,9 +466,12 @@ NORETRY_ERRORS = {};
 NORETRY_ERRORS[NORMALIZED_ERRORS.INVALID_EMAIL] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.MAIL_SERVICE_NOT_ENABLED] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.NO_RECIPIENT] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.NOT_FOUND] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.IMAP_FEATURES_DISABLED_BY_ADMIN] = true;
 
+NORETRY_ERRORS[NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME] = true;
@@ -596,11 +612,22 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Câu trả lời trống": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'vi'},
   "Resposta vazia": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'pt'},
   "Prázdná odpověď": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'cs'},
+  "Răspuns gol": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'ro_MD'},
+  
+  // "Bad value"
+  "Bad value": { ref: NORMALIZED_ERRORS.BAD_VALUE, locale: 'en'},
+  "Helytelen érték": { ref: NORMALIZED_ERRORS.BAD_VALUE, locale: 'hu'},
+  "Valor incorrecto": { ref: NORMALIZED_ERRORS.BAD_VALUE, locale: 'es'},
+  "Giá trị không hợp lệ": { ref: NORMALIZED_ERRORS.BAD_VALUE, locale: 'vi'},
   
   // "Limit Exceeded: ."
   "Limit Exceeded: .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'en'},
   "Límite excedido: .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'es'},
   "Limite dépassée : .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'fr'},
+  
+  // "Limit Exceeded: Email Recipients Per Message."
+  "Limit Exceeded: Email Recipients Per Message.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE, locale: 'en'},
+  "Sınır Aşıldı: İleti Başına E-posta Alıcısı.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE, locale: 'tr'},
   
   // "User Rate Limit Exceeded" - eg: Gmail.Users.Threads.get
   "User Rate Limit Exceeded": { ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED, locale: 'en'},
@@ -646,6 +673,9 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Item dengan ID yang diberikan tidak dapat ditemukan atau Anda tidak memiliki izin untuk mengaksesnya.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'in'},
   "指定された ID のアイテムは見つからなかったか、アクセスする権限がありません。": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'ja'},
   
+  // "You do not have permissions to access the requested document."
+  "You do not have permissions to access the requested document.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'en'},
+  
   // "Unable to talk to trigger service"
   "Unable to talk to trigger service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'en'},
   "Impossible de communiquer pour déclencher le service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'fr'},
@@ -672,6 +702,8 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // "Recipient address required" - eg: Gmail.Users.Messages.send()
   "Recipient address required": { ref: NORMALIZED_ERRORS.NO_RECIPIENT, locale: 'en'},
   
+  // "IMAP features disabled by administrator"
+  "IMAP features disabled by administrator": { ref: NORMALIZED_ERRORS.IMAP_FEATURES_DISABLED_BY_ADMIN, locale: 'en'},
 };
 
 /**
@@ -709,7 +741,11 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
     locale: 'vi'},
-    
+  {regex: /^Falta el documento (\S*) \(puede que se haya eliminado\)\.$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
+    locale: 'es'},
+              
   // User-rate limit exceeded. Retry after XXX
   {regex: /^(?:Limit Exceeded: : )?User-rate limit exceeded\.\s+Retry after (.*Z)/,
     variables: ['timestamp'],
