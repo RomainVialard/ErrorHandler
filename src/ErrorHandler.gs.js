@@ -439,7 +439,6 @@ NORMALIZED_ERRORS = {
   RATE_LIMIT_EXCEEDED: "Rate Limit Exceeded",
   NOT_FOUND: "Not Found",
   BACKEND_ERROR: "Backend Error",
-  SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL: "Service invoked too many times for one day: email.",
   TRYING_TO_EDIT_PROTECTED_CELL: "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.",
   NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND: "No item with the given ID could be found, or you do not have permission to access it.",
   NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT: "You do not have permissions to access the requested document.",
@@ -455,6 +454,7 @@ NORMALIZED_ERRORS = {
   INVALID_EMAIL: 'Invalid email',
   DOCUMENT_MISSING: 'Document is missing (perhaps it was deleted?)',
   USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME: 'User-rate limit exceeded. Retry after specified time.',
+  SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY: "Service invoked too many times for one day.",
   INVALID_ARGUMENT: 'Invalid argument',
   SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME: 'A sheet with this name already exists. Please enter another name.',
 };
@@ -468,7 +468,7 @@ NORETRY_ERRORS[NORMALIZED_ERRORS.MAIL_SERVICE_NOT_ENABLED] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.NO_RECIPIENT] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.NOT_FOUND] = true;
-NORETRY_ERRORS[NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.IMAP_FEATURES_DISABLED_BY_ADMIN] = true;
 
 NORETRY_ERRORS[NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT] = true;
@@ -644,13 +644,6 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // "Backend Error"
   "Backend Error": { ref: NORMALIZED_ERRORS.BACKEND_ERROR, locale: 'en'},
   
-  // "Service invoked too many times for one day: email."
-  "Service invoked too many times for one day: email.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'en'},
-  "Trop d'appels pour ce service aujourd'hui : email.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'fr'},
-  "Servicio solicitado demasiadas veces en un mismo día: gmail.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'es'},
-  "Servicio solicitado demasiadas veces en un mismo día: email.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'es'},
-  "Serviço chamado muitas vezes no mesmo dia: email.": { ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_EMAIL, locale: 'pt'},  
-  
   // "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit."
   "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'en'},
   "保護されているセルやオブジェクトを編集しようとしています。編集する必要がある場合は、スプレッドシートのオーナーに連絡して保護を解除してもらってください。": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'ja'},
@@ -751,6 +744,24 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['timestamp'],
     ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
     locale: 'en'},
+  
+  // Service invoked too many times for one day: XXX. (XXX: urlfetch, email)
+  {regex: /^Service invoked too many times for one day: ([^\.]*)\.$/,
+    variables: ['service'],
+    ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
+    locale: 'en'},
+  {regex: /^Trop d'appels pour ce service aujourd'hui : ([^\.]*)\.$/,
+    variables: ['service'],
+    ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
+    locale: 'fr'},
+  {regex: /^Servicio solicitado demasiadas veces en un mismo día: ([^\.]*)\.$/,
+    variables: ['service'],
+    ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
+    locale: 'es'},
+  {regex: /^Serviço chamado muitas vezes no mesmo dia: ([^\.]*)\.$/,
+    variables: ['service'],
+    ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
+    locale: 'pt'},
   
   // "Invalid argument: XXX" - wrong email alias used - eg: GmailApp.sendEmail()
   {regex: /^Invalid argument: (.*)$/,
