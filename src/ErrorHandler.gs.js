@@ -668,6 +668,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   
   // "You do not have permissions to access the requested document."
   "You do not have permissions to access the requested document.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'en'},
+  "Bạn không có quyền truy cập tài liệu yêu cầu.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'vi'},
   
   // "Unable to talk to trigger service"
   "Unable to talk to trigger service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'en'},
