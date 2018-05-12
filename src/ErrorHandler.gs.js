@@ -438,6 +438,7 @@ NORMALIZED_ERRORS = {
   USER_RATE_LIMIT_EXCEEDED: "User Rate Limit Exceeded",
   RATE_LIMIT_EXCEEDED: "Rate Limit Exceeded",
   NOT_FOUND: "Not Found",
+  BAD_REQUEST: "Bad Request",
   BACKEND_ERROR: "Backend Error",
   TRYING_TO_EDIT_PROTECTED_CELL: "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.",
   NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND: "No item with the given ID could be found, or you do not have permission to access it.",
@@ -468,6 +469,7 @@ NORETRY_ERRORS[NORMALIZED_ERRORS.MAIL_SERVICE_NOT_ENABLED] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.NO_RECIPIENT] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.NOT_FOUND] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.BAD_REQUEST] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.IMAP_FEATURES_DISABLED_BY_ADMIN] = true;
 
@@ -640,6 +642,9 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Not Found": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'en'},
   // with lowercase "f" when calling Gmail.Users.Threads endpoint
   "Not found": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'en'},
+  
+  // "Bad Request" - eg: all 'list' requests from Gmail advanced service, maybe if there are 0 messages in Gmail (new account)
+  "Bad Request": { ref: NORMALIZED_ERRORS.BAD_REQUEST, locale: 'en'},
   
   // "Backend Error"
   "Backend Error": { ref: NORMALIZED_ERRORS.BACKEND_ERROR, locale: 'en'},
