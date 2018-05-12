@@ -428,29 +428,39 @@ function getErrorLocale(localizedErrorMessage) {
  * List all known Errors
  */
 NORMALIZED_ERRORS = {
+  // Google Sheets
   CONDITIONNAL_RULE_REFERENCE_DIF_SHEET: "Conditional format rule cannot reference a different sheet.",
-  SERVER_ERROR_RETRY_LATER: "We're sorry, a server error occurred. Please wait a bit and try again.",
-  AUTHORIZATION_REQUIRED: "Authorization is required to perform that action. Please run the script again to authorize it.",
-  EMPTY_RESPONSE: "Empty response",
-  BAD_VALUE: "Bad value",
-  LIMIT_EXCEEDED: "Limit Exceeded: .",
-  LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE: "Limit Exceeded: Email Recipients Per Message.",
-  USER_RATE_LIMIT_EXCEEDED: "User Rate Limit Exceeded",
-  RATE_LIMIT_EXCEEDED: "Rate Limit Exceeded",
-  NOT_FOUND: "Not Found",
-  BAD_REQUEST: "Bad Request",
-  BACKEND_ERROR: "Backend Error",
   TRYING_TO_EDIT_PROTECTED_CELL: "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.",
+  RANGE_NOT_FOUND: "Range not found",
+  
+  // Google Drive
   NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND: "No item with the given ID could be found, or you do not have permission to access it.",
   NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT: "You do not have permissions to access the requested document.",
-  UNABLE_TO_TALK_TO_TRIGGER_SERVICE: "Unable to talk to trigger service",
+  
+  // Gmail / email service
   MAIL_SERVICE_NOT_ENABLED: "Mail service not enabled",
   INVALID_THREAD_ID_VALUE: "Invalid thread_id value",
   LABEL_ID_NOT_FOUND: "labelId not found",
   LABEL_NAME_EXISTS_OR_CONFLICTS: "Label name exists or conflicts",
   NO_RECIPIENT: "Failed to send email: no recipient",
   IMAP_FEATURES_DISABLED_BY_ADMIN: "IMAP features disabled by administrator",
-    
+  LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE: "Limit Exceeded: Email Recipients Per Message.",
+  GMAIL_NOT_DEFINED: "\"Gmail\" is not defined.",
+  
+  // miscellaneous
+  SERVER_ERROR_RETRY_LATER: "We're sorry, a server error occurred. Please wait a bit and try again.",
+  AUTHORIZATION_REQUIRED: "Authorization is required to perform that action. Please run the script again to authorize it.",
+  EMPTY_RESPONSE: "Empty response",
+  BAD_VALUE: "Bad value",
+  LIMIT_EXCEEDED: "Limit Exceeded: .",
+  USER_RATE_LIMIT_EXCEEDED: "User Rate Limit Exceeded",
+  RATE_LIMIT_EXCEEDED: "Rate Limit Exceeded",
+  NOT_FOUND: "Not Found",
+  BAD_REQUEST: "Bad Request",
+  BACKEND_ERROR: "Backend Error",
+  UNABLE_TO_TALK_TO_TRIGGER_SERVICE: "Unable to talk to trigger service",
+  ACTION_NOT_ALLOWED_THROUGH_EXEC_API: "Script has attempted to perform an action that is not allowed when invoked through the Google Apps Script Execution API.",
+  
   // Partial match error
   INVALID_EMAIL: 'Invalid email',
   DOCUMENT_MISSING: 'Document is missing (perhaps it was deleted?)',
@@ -466,6 +476,7 @@ NORMALIZED_ERRORS = {
 NORETRY_ERRORS = {};
 NORETRY_ERRORS[NORMALIZED_ERRORS.INVALID_EMAIL] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.MAIL_SERVICE_NOT_ENABLED] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.GMAIL_NOT_DEFINED] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.NO_RECIPIENT] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.NOT_FOUND] = true;
@@ -476,10 +487,12 @@ NORETRY_ERRORS[NORMALIZED_ERRORS.IMAP_FEATURES_DISABLED_BY_ADMIN] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.RANGE_NOT_FOUND] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME] = true;
 
 NORETRY_ERRORS[NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.INVALID_ARGUMENT] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.ACTION_NOT_ALLOWED_THROUGH_EXEC_API] = true;
 
 
 // noinspection JSUnusedGlobalSymbols, ThisExpressionReferencesGlobalObjectJS
@@ -655,6 +668,9 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Estás intentando editar una celda o un objeto protegidos. Ponte en contacto con el propietario de la hoja de cálculo para desprotegerla si es necesario modificarla.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'es'},
   "Vous tentez de modifier une cellule ou un objet protégés. Si vous avez besoin d'effectuer cette modification, demandez au propriétaire de la feuille de calcul de supprimer la protection.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'fr'},
   
+  // "Range not found"
+  "Range not found": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'en'},
+  
   // "No item with the given ID could be found, or you do not have permission to access it."
   "No item with the given ID could be found, or you do not have permission to access it.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'en'},
   "Không tìm thấy mục nào có ID đã cung cấp hoặc bạn không có quyền truy cập vào mục đó.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'vi'},
@@ -674,13 +690,25 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // "You do not have permissions to access the requested document."
   "You do not have permissions to access the requested document.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'en'},
   "Bạn không có quyền truy cập tài liệu yêu cầu.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'vi'},
+  "No dispones del permiso necesario para acceder al documento solicitado.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'es'},
+  "Vous n'avez pas l'autorisation d'accéder au document demandé.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'fr'},
   
   // "Unable to talk to trigger service"
   "Unable to talk to trigger service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'en'},
   "Impossible de communiquer pour déclencher le service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'fr'},
+  "Không thể trao đổi với người môi giới để kích hoạt dịch vụ": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'vi'},
+  "No es posible ponerse en contacto con el servicio de activación.": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'es'},
+  "無法與觸發服務聯絡": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'zh_TW'},
+  
+  // "Script has attempted to perform an action that is not allowed when invoked through the Google Apps Script Execution API."
+  "Script has attempted to perform an action that is not allowed when invoked through the Google Apps Script Execution API.": { ref: NORMALIZED_ERRORS.ACTION_NOT_ALLOWED_THROUGH_EXEC_API, locale: 'en'},
   
   // "Mail service not enabled"
   "Mail service not enabled": { ref: NORMALIZED_ERRORS.MAIL_SERVICE_NOT_ENABLED, locale: 'en'},
+  
+  // This error happens because the Gmail advanced service was not properly loaded during this Apps Script process execution
+  // In this case, we need to start a new process execution, ie restart exec from client side - no need to retry multiple times
+  "\"Gmail\" is not defined.": { ref: NORMALIZED_ERRORS.GMAIL_NOT_DEFINED, locale: 'en'},
   
   // "Invalid thread_id value"
   "Invalid thread_id value": { ref: NORMALIZED_ERRORS.INVALID_THREAD_ID_VALUE, locale: 'en'},
@@ -784,7 +812,14 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['sheetName'],
     ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
     locale: 'es_419'},
-  
+  {regex: /^Đã tồn tại một trang tính có tên "([^"]*)"\. Vui lòng nhập tên khác\.$/,
+    variables: ['sheetName'],
+    ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
+    locale: 'vi'},
+  {regex: /^Une feuille nommée "([^"]*)" existe déjà\. Veuillez saisir un autre nom\.$/,
+    variables: ['sheetName'],
+    ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
+    locale: 'fr'},
 ];
 
 /**
