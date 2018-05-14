@@ -692,6 +692,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Bạn không có quyền truy cập tài liệu yêu cầu.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'vi'},
   "No dispones del permiso necesario para acceder al documento solicitado.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'es'},
   "Vous n'avez pas l'autorisation d'accéder au document demandé.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'fr'},
+  "Non disponi dell'autorizzazione necessaria per accedere al documento richiesto.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'it'},
   
   // "Unable to talk to trigger service"
   "Unable to talk to trigger service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'en'},
@@ -808,10 +809,18 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['sheetName'],
     ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
     locale: 'en'},
+  {regex: /^A sheet with the name ‘([^’]*)’ already exists\. Please enter another name\.$/,
+    variables: ['sheetName'],
+    ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
+    locale: 'en_NZ'},  
   {regex: /^Ya existe una hoja con el nombre "([^"]*)"\. Ingresa otro\.$/,
     variables: ['sheetName'],
     ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
     locale: 'es_419'},
+  {regex: /^Ya existe una hoja con el nombre "([^"]*)"\. Introduce un nombre distinto\.$/,
+    variables: ['sheetName'],
+    ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
+    locale: 'es'},  
   {regex: /^Đã tồn tại một trang tính có tên "([^"]*)"\. Vui lòng nhập tên khác\.$/,
     variables: ['sheetName'],
     ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
@@ -820,6 +829,14 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['sheetName'],
     ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
     locale: 'fr'},
+  {regex: /^Esiste già un foglio con il nome "([^"]*)"\. Inserisci un altro nome\.$/,
+    variables: ['sheetName'],
+    ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
+    locale: 'it'},
+  {regex: /^已有工作表使用「([^」]*)」這個名稱。請輸入其他名稱。$/,
+    variables: ['sheetName'],
+    ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
+    locale: 'zh_TW'},
 ];
 
 /**
