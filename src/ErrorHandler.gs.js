@@ -693,6 +693,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "No dispones del permiso necesario para acceder al documento solicitado.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'es'},
   "Vous n'avez pas l'autorisation d'accéder au document demandé.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'fr'},
   "Non disponi dell'autorizzazione necessaria per accedere al documento richiesto.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'it'},
+  "No cuenta con los permisos necesarios para acceder al documento solicitado.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'es_CO'},
   
   // "Unable to talk to trigger service"
   "Unable to talk to trigger service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'en'},
