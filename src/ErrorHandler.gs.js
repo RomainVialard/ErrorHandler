@@ -272,10 +272,16 @@ function logError(error, additionalParams, options) {
   }
   
   if (error.name) {
-    // examples of error name: Error, ReferenceError, Exception, GoogleJsonResponseException
+    // examples of error name: Error, ReferenceError, Exception, GoogleJsonResponseException, HttpResponseException
     // would be nice to categorize
     log.context.errorName = error.name;
-    message = error.name +": "+ message;
+    if (error.name === "HttpResponseException") {
+      // In this case message is usually very long as it contains the HTML of the error response page
+      // eg: 'Response Code: 502. Message: <!DOCTYPE html> <html lang=en>'
+      // for now, shorten and only retrieve response code
+      message = message.split('.')[0];
+    }
+    message = error.name + ": " + message;
   }
   log.message = message;
   
