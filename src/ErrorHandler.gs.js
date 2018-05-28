@@ -683,7 +683,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // "Range not found"
   "Range not found": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'en'},
   
-  // "No item with the given ID could be found, or you do not have permission to access it."
+  // "No item with the given ID could be found, or you do not have permission to access it." - eg:DriveApp.getFileById
   "No item with the given ID could be found, or you do not have permission to access it.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'en'},
   "Không tìm thấy mục nào có ID đã cung cấp hoặc bạn không có quyền truy cập vào mục đó.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'vi'},
   "No se ha encontrado ningún elemento con el ID proporcionado o no tienes permiso para acceder a él.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'es'},
@@ -698,6 +698,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Nebyly nalezeny žádné položky se zadaným ID nebo nemáte oprávnění k nim přistupovat.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'cs'},
   "Item dengan ID yang diberikan tidak dapat ditemukan atau Anda tidak memiliki izin untuk mengaksesnya.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'in'},
   "指定された ID のアイテムは見つからなかったか、アクセスする権限がありません。": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'ja'},
+  "Не вдалося знайти елемент із зазначеним ідентифікатором. Або у вас немає дозволу на доступ до нього.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'uk'},
   
   // "You do not have permissions to access the requested document."
   "You do not have permissions to access the requested document.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'en'},
@@ -777,8 +778,12 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
   {regex: /^Email không hợp lệ: (.*)$/,
     variables: ['email'],
     ref: NORMALIZED_ERRORS.INVALID_EMAIL,
-    locale: 'vi'},  
-    
+    locale: 'vi'},
+  {regex: /^Ongeldige e-mail: (.*)$/,
+    variables: ['email'],
+    ref: NORMALIZED_ERRORS.INVALID_EMAIL,
+    locale: 'nl'},
+      
   // Document XXX is missing (perhaps it was deleted?)
   {regex: /^Document (\S*) is missing \(perhaps it was deleted\?\)$/,
     variables: ['docId'],
@@ -796,7 +801,7 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
     locale: 'es'},
-  {regex: /^找不到文件「([^」]*)」\((可能已遭刪除\)$/,
+  {regex: /^找不到文件「([^」]*)」\(可能已遭刪除\)$/,
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
     locale: 'zh_TW'},  
