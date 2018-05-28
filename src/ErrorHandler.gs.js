@@ -448,10 +448,12 @@ NORMALIZED_ERRORS = {
   INVALID_THREAD_ID_VALUE: "Invalid thread_id value",
   LABEL_ID_NOT_FOUND: "labelId not found",
   LABEL_NAME_EXISTS_OR_CONFLICTS: "Label name exists or conflicts",
+  INVALID_LABEL_NAME: "Invalid label name",
   NO_RECIPIENT: "Failed to send email: no recipient",
   IMAP_FEATURES_DISABLED_BY_ADMIN: "IMAP features disabled by administrator",
   LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE: "Limit Exceeded: Email Recipients Per Message.",
   GMAIL_NOT_DEFINED: "\"Gmail\" is not defined.",
+  GMAIL_OPERATION_NOT_ALLOWED: "Gmail operation not allowed.",
   
   // miscellaneous
   SERVER_ERROR_RETRY_LATER: "We're sorry, a server error occurred. Please wait a bit and try again.",
@@ -472,6 +474,7 @@ NORMALIZED_ERRORS = {
   DOCUMENT_MISSING: 'Document is missing (perhaps it was deleted?)',
   USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME: 'User-rate limit exceeded. Retry after specified time.',
   SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY: "Service invoked too many times for one day.",
+  SERVICE_UNAVAILABLE: "Service unavailable",
   INVALID_ARGUMENT: 'Invalid argument',
   SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME: 'A sheet with this name already exists. Please enter another name.',
 };
@@ -721,6 +724,9 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // In this case, we need to start a new process execution, ie restart exec from client side - no need to retry multiple times
   "\"Gmail\" is not defined.": { ref: NORMALIZED_ERRORS.GMAIL_NOT_DEFINED, locale: 'en'},
   
+  // "Gmail operation not allowed." - eg: GmailApp.sendEmail()
+  "Gmail operation not allowed.": { ref: NORMALIZED_ERRORS.GMAIL_OPERATION_NOT_ALLOWED, locale: 'en'},
+  
   // "Invalid thread_id value"
   "Invalid thread_id value": { ref: NORMALIZED_ERRORS.INVALID_THREAD_ID_VALUE, locale: 'en'},
   
@@ -729,6 +735,9 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   
   // "Label name exists or conflicts"
   "Label name exists or conflicts": { ref: NORMALIZED_ERRORS.LABEL_NAME_EXISTS_OR_CONFLICTS, locale: 'en'},
+  
+  // "Invalid label name"
+  "Invalid label name": { ref: NORMALIZED_ERRORS.INVALID_LABEL_NAME, locale: 'en'},
   
   // "Invalid to header" - eg: Gmail.Users.Messages.send
   "Invalid to header": { ref: NORMALIZED_ERRORS.INVALID_EMAIL, locale: 'en'},
@@ -765,6 +774,10 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['email'],
     ref: NORMALIZED_ERRORS.INVALID_EMAIL,
     locale: 'fr'},
+  {regex: /^Email không hợp lệ: (.*)$/,
+    variables: ['email'],
+    ref: NORMALIZED_ERRORS.INVALID_EMAIL,
+    locale: 'vi'},  
     
   // Document XXX is missing (perhaps it was deleted?)
   {regex: /^Document (\S*) is missing \(perhaps it was deleted\?\)$/,
@@ -783,6 +796,10 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
     locale: 'es'},
+  {regex: /^找不到文件「([^」]*)」\((可能已遭刪除\)$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
+    locale: 'zh_TW'},  
               
   // User-rate limit exceeded. Retry after XXX
   {regex: /^(?:Limit Exceeded: : )?User-rate limit exceeded\.\s+Retry after (.*Z)/,
@@ -793,20 +810,26 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
   // Service invoked too many times for one day: XXX. (XXX: urlfetch, email)
   {regex: /^Service invoked too many times for one day: ([^\.]*)\.$/,
     variables: ['service'],
-    ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
+    ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
     locale: 'en'},
   {regex: /^Trop d'appels pour ce service aujourd'hui : ([^\.]*)\.$/,
     variables: ['service'],
-    ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
+    ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
     locale: 'fr'},
   {regex: /^Servicio solicitado demasiadas veces en un mismo día: ([^\.]*)\.$/,
     variables: ['service'],
-    ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
+    ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
     locale: 'es'},
   {regex: /^Serviço chamado muitas vezes no mesmo dia: ([^\.]*)\.$/,
     variables: ['service'],
-    ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
+    ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
     locale: 'pt'},
+  
+  // Service unavailable: XXX (XXX: Docs)
+  {regex: /^Service unavailable: (.*)$/,
+    variables: ['service'],
+    ref: NORMALIZED_ERRORS.SERVICE_UNAVAILABLE,
+    locale: 'en'},
   
   // "Invalid argument: XXX" - wrong email alias used - eg: GmailApp.sendEmail()
   {regex: /^Invalid argument: (.*)$/,
