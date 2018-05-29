@@ -438,6 +438,7 @@ NORMALIZED_ERRORS = {
   CONDITIONNAL_RULE_REFERENCE_DIF_SHEET: "Conditional format rule cannot reference a different sheet.",
   TRYING_TO_EDIT_PROTECTED_CELL: "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.",
   RANGE_NOT_FOUND: "Range not found",
+  RANGE_COORDINATES_ARE_OUTSIDE_SHEET_DIMENSIONS: "The coordinates of the range are outside the dimensions of the sheet.",
   
   // Google Drive
   NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND: "No item with the given ID could be found, or you do not have permission to access it.",
@@ -608,6 +609,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Sąlyginio formato taisyklė negali nurodyti kito lapo.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'lt'},
   "Regula cu format condiționat nu poate face referire la altă foaie.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ro'},
   "Tingimusvormingu reegel ei saa viidata teisele lehele.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'et'},
+  "Правило за условно обликовање не може да указује на другу табелу.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'sr'},
   
   // "We're sorry, a server error occurred. Please wait a bit and try again."
   "We're sorry, a server error occurred. Please wait a bit and try again.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'en'},
@@ -665,6 +667,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Not Found": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'en'},
   // with lowercase "f" when calling Gmail.Users.Threads endpoint
   "Not found": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'en'},
+  "Não encontrado": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'pt_PT'},
   
   // "Bad Request" - eg: all 'list' requests from Gmail advanced service, maybe if there are 0 messages in Gmail (new account)
   "Bad Request": { ref: NORMALIZED_ERRORS.BAD_REQUEST, locale: 'en'},
@@ -679,6 +682,12 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Vous tentez de modifier une cellule ou un objet protégés. Si vous avez besoin d'effectuer cette modification, demandez au propriétaire de la feuille de calcul de supprimer la protection.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'fr'},
   "Эта область защищена. Чтобы изменить ее, обратитесь к владельцу таблицы.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'ru'},
   "Estás intentando modificar una celda o un objeto protegido. Si necesitas realizar cambios, comunícate con el propietario de la hoja de cálculo para que quite la protección.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'es_MX'},
+  "Você está tentando editar uma célula ou um objeto protegido. Se precisar editar, entre em contato com o proprietário da planilha para remover a proteção.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'pt'},
+  
+  // "The coordinates of the range are outside the dimensions of the sheet."
+  "The coordinates of the range are outside the dimensions of the sheet.": { ref: NORMALIZED_ERRORS.RANGE_COORDINATES_ARE_OUTSIDE_SHEET_DIMENSIONS, locale: 'en'},
+  "As coordenadas do intervalo estão fora das dimensões da página.": { ref: NORMALIZED_ERRORS.RANGE_COORDINATES_ARE_OUTSIDE_SHEET_DIMENSIONS, locale: 'pt'},
+  "Tọa độ của dải ô nằm ngoài kích thước của trang tính.": { ref: NORMALIZED_ERRORS.RANGE_COORDINATES_ARE_OUTSIDE_SHEET_DIMENSIONS, locale: 'vi'},
   
   // "Range not found"
   "Range not found": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'en'},
@@ -805,9 +814,13 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
     locale: 'zh_TW'},  
+  {regex: /^Документ (\S*) отсутствует \(возможно, он был удален\)$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
+    locale: 'ru'},
               
-  // User-rate limit exceeded. Retry after XXX
-  {regex: /^(?:Limit Exceeded: : )?User-rate limit exceeded\.\s+Retry after (.*Z)/,
+  // User-rate limit exceeded. Retry after XXX - this error can be prefixed with a translated version of 'Limit Exceeded'
+  {regex: /User-rate limit exceeded\.\s+Retry after (.*Z)/,
     variables: ['timestamp'],
     ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
     locale: 'en'},
@@ -875,6 +888,10 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['sheetName'],
     ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
     locale: 'zh_TW'},
+  {regex: /^Es ist bereits ein Tabellenblatt mit dem Namen "([^"]*)" vorhanden\. Geben Sie einen anderen Namen ein\.$/,
+    variables: ['sheetName'],
+    ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
+    locale: 'de'},
 ];
 
 /**
