@@ -683,7 +683,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // "Range not found"
   "Range not found": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'en'},
   
-  // "No item with the given ID could be found, or you do not have permission to access it." - eg:DriveApp.getFileById
+  // "No item with the given ID could be found, or you do not have permission to access it." - eg:Drive App.getFileById
   "No item with the given ID could be found, or you do not have permission to access it.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'en'},
   "Không tìm thấy mục nào có ID đã cung cấp hoặc bạn không có quyền truy cập vào mục đó.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'vi'},
   "No se ha encontrado ningún elemento con el ID proporcionado o no tienes permiso para acceder a él.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'es'},
@@ -725,7 +725,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // In this case, we need to start a new process execution, ie restart exec from client side - no need to retry multiple times
   "\"Gmail\" is not defined.": { ref: NORMALIZED_ERRORS.GMAIL_NOT_DEFINED, locale: 'en'},
   
-  // "Gmail operation not allowed." - eg: GmailApp.sendEmail()
+  // "Gmail operation not allowed." - eg: Gmail App.sendEmail()
   "Gmail operation not allowed.": { ref: NORMALIZED_ERRORS.GMAIL_OPERATION_NOT_ALLOWED, locale: 'en'},
   
   // "Invalid thread_id value"
@@ -745,7 +745,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // "Invalid cc header" - eg: Gmail.Users.Messages.send
   "Invalid cc header": { ref: NORMALIZED_ERRORS.INVALID_EMAIL, locale: 'en'},  
   
-  // "Failed to send email: no recipient" - eg: GmailApp.sendEmail()
+  // "Failed to send email: no recipient" - eg: Gmail App.sendEmail()
   "Failed to send email: no recipient": { ref: NORMALIZED_ERRORS.NO_RECIPIENT, locale: 'en'},
   // "Recipient address required" - eg: Gmail.Users.Messages.send()
   "Recipient address required": { ref: NORMALIZED_ERRORS.NO_RECIPIENT, locale: 'en'},
@@ -836,7 +836,7 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     ref: NORMALIZED_ERRORS.SERVICE_UNAVAILABLE,
     locale: 'en'},
   
-  // "Invalid argument: XXX" - wrong email alias used - eg: GmailApp.sendEmail()
+  // "Invalid argument: XXX" - wrong email alias used - eg: Gmail App.sendEmail()
   {regex: /^Invalid argument: (.*)$/,
     variables: ['email'],
     ref: NORMALIZED_ERRORS.INVALID_ARGUMENT,
