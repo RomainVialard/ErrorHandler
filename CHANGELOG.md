@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- Add new, unreleased changes here. -->
 * none
 
+
+## [2.1.0] - 2018-05-30
+* FIX: remove explicit Google Apps Script servine names in comments: avoid auto-adding unused scopes
+* possibility to include script version number in logs
+* new Translations
+
 ## [2.0.0] - 2018-04-24
 * Breaking changes: expBackoff(): use options to specify its behavior (throw on fail, verbose, retryNumber, doNotLogKnownErrors)
 * Leverage Normalized GAS error in logError()

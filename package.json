@@ -1,6 +1,6 @@
 {
 	"name": "@scriptaddicts/gas-error-handler",
-	"version": "2.0.0",
+	"version": "2.1.0",
 	"description": "Methods to handle error in GAS",
 	"license": "Apache-2.0",
 	"author": {
