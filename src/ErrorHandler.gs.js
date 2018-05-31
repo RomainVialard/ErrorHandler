@@ -25,7 +25,7 @@
  *
  * @example
  * // Calls an anonymous function that concatenates a greeting with the current Apps user's email
- * ErrorHandler.expBackoff(function(){return "Hello, " + Session.getActiveUser().getEmail();});
+ * ErrorHandler.expBackoff(function(){return "Hello, " + Session_.getActiveUser().getEmail();});
  *
  * @example
  * // Calls an existing function
@@ -453,6 +453,7 @@ NORMALIZED_ERRORS = {
   NO_RECIPIENT: "Failed to send email: no recipient",
   IMAP_FEATURES_DISABLED_BY_ADMIN: "IMAP features disabled by administrator",
   LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE: "Limit Exceeded: Email Recipients Per Message.",
+  LIMIT_EXCEEDED_EMAIL_BODY_SIZE: "Limit Exceeded: Email Body Size.",
   GMAIL_NOT_DEFINED: "\"Gmail\" is not defined.",
   GMAIL_OPERATION_NOT_ALLOWED: "Gmail operation not allowed.",
   
@@ -489,6 +490,7 @@ NORETRY_ERRORS[NORMALIZED_ERRORS.MAIL_SERVICE_NOT_ENABLED] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.GMAIL_NOT_DEFINED] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.NO_RECIPIENT] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_BODY_SIZE] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.NOT_FOUND] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.BAD_REQUEST] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY] = true;
@@ -630,6 +632,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Authorization is required to perform that action. Please run the script again to authorize it.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'en'},
   "Autorisation requise pour exécuter cette action. Exécutez à nouveau le script pour autoriser cette action.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'fr'},
   "Cần được cho phép để thực hiện tác vụ đó. Hãy chạy lại tập lệnh để cho phép tác vụ.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'vi'},
+  "É necessária autorização para executar esta ação. Execute o script novamente para autorizar a ação.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'pt'},
   
   // "Empty response"
   "Empty response": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'en'},
@@ -645,6 +648,8 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Helytelen érték": { ref: NORMALIZED_ERRORS.BAD_VALUE, locale: 'hu'},
   "Valor incorrecto": { ref: NORMALIZED_ERRORS.BAD_VALUE, locale: 'es'},
   "Giá trị không hợp lệ": { ref: NORMALIZED_ERRORS.BAD_VALUE, locale: 'vi'},
+  "Valeur incorrecte": { ref: NORMALIZED_ERRORS.BAD_VALUE, locale: 'fr'},
+  "Valor inválido": { ref: NORMALIZED_ERRORS.BAD_VALUE, locale: 'pt'},
   
   // "Limit Exceeded: ."
   "Limit Exceeded: .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'en'},
@@ -655,6 +660,9 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Limit Exceeded: Email Recipients Per Message.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE, locale: 'en'},
   "Sınır Aşıldı: İleti Başına E-posta Alıcısı.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE, locale: 'tr'},
   "Đã vượt quá giới hạn: Người nhận email trên mỗi thư.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE, locale: 'vi'},
+  
+  // "Limit Exceeded: Email Body Size."
+  "Limit Exceeded: Email Body Size.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_BODY_SIZE, locale: 'en'},
   
   // "User Rate Limit Exceeded" - eg: Gmail.Users.Threads.get
   "User Rate Limit Exceeded": { ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED, locale: 'en'},
@@ -668,6 +676,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // with lowercase "f" when calling Gmail.Users.Threads endpoint
   "Not found": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'en'},
   "Não encontrado": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'pt_PT'},
+  "No se ha encontrado.": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'es'},
   
   // "Bad Request" - eg: all 'list' requests from Gmail advanced service, maybe if there are 0 messages in Gmail (new account)
   "Bad Request": { ref: NORMALIZED_ERRORS.BAD_REQUEST, locale: 'en'},
@@ -683,6 +692,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Эта область защищена. Чтобы изменить ее, обратитесь к владельцу таблицы.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'ru'},
   "Estás intentando modificar una celda o un objeto protegido. Si necesitas realizar cambios, comunícate con el propietario de la hoja de cálculo para que quite la protección.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'es_MX'},
   "Você está tentando editar uma célula ou um objeto protegido. Se precisar editar, entre em contato com o proprietário da planilha para remover a proteção.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'pt'},
+  "Покушавате да измените заштићену ћелију или објекат. Контактирајте власника табеле да уклони заштиту ако треба да унесете измене.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'sr'},
   
   // "The coordinates of the range are outside the dimensions of the sheet."
   "The coordinates of the range are outside the dimensions of the sheet.": { ref: NORMALIZED_ERRORS.RANGE_COORDINATES_ARE_OUTSIDE_SHEET_DIMENSIONS, locale: 'en'},
@@ -691,6 +701,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   
   // "Range not found"
   "Range not found": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'en'},
+  "No se ha encontrado el intervalo.": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'es'},
   
   // "No item with the given ID could be found, or you do not have permission to access it." - eg:Drive App.getFileById
   "No item with the given ID could be found, or you do not have permission to access it.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'en'},
@@ -708,6 +719,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Item dengan ID yang diberikan tidak dapat ditemukan atau Anda tidak memiliki izin untuk mengaksesnya.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'in'},
   "指定された ID のアイテムは見つからなかったか、アクセスする権限がありません。": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'ja'},
   "Не вдалося знайти елемент із зазначеним ідентифікатором. Або у вас немає дозволу на доступ до нього.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'uk'},
+  "Verilen kimliğe sahip öğe bulunamadı veya bu öğeye erişme iznine sahip değilsiniz.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'tr'},
   
   // "You do not have permissions to access the requested document."
   "You do not have permissions to access the requested document.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'en'},
@@ -817,12 +829,27 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
   {regex: /^Документ (\S*) отсутствует \(возможно, он был удален\)$/,
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
-    locale: 'ru'},
-              
+    locale: 'ru'},  
+  {regex: /^Le document (\S*) est manquant \(peut-être a-t-il été supprimé \?\)$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
+    locale: 'fr'},
+  {regex: /^Dokumen (\S*) hilang \(mungkin dihapus\?\)$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
+    locale: 'in'},
+                
   // User-rate limit exceeded. Retry after XXX - this error can be prefixed with a translated version of 'Limit Exceeded'
   {regex: /User-rate limit exceeded\.\s+Retry after (.*Z)/,
     variables: ['timestamp'],
     ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
+    locale: 'en'},
+  
+  // User Rate Limit Exceeded. Rate of requests for user exceed configured project quota. 
+  // You may consider re-evaluating expected per-user traffic to the API and adjust project quota limits accordingly. 
+  // You may monitor aggregate quota usage and adjust limits in the API Console: https://console.developers.google.com/XXX
+  {regex: /User Rate Limit Exceeded\. Rate of requests for user exceed configured project quota\./,
+    ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED,
     locale: 'en'},
   
   // Service invoked too many times for one day: XXX. (XXX: urlfetch, email)
@@ -892,6 +919,14 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['sheetName'],
     ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
     locale: 'de'},
+  {regex: /^이름이 ‘([^’]*)’인 시트가 이미 있습니다\. 다른 이름을 입력해 주세요\.$/,
+    variables: ['sheetName'],
+    ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
+    locale: 'ko'},
+  {regex: /^シート名「([^」]*)」はすでに存在しています。別の名前を入力してください。$/,
+    variables: ['sheetName'],
+    ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
+    locale: 'ja'},
 ];
 
 /**
