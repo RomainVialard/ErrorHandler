@@ -455,6 +455,7 @@ NORMALIZED_ERRORS = {
   IMAP_FEATURES_DISABLED_BY_ADMIN: "IMAP features disabled by administrator",
   LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE: "Limit Exceeded: Email Recipients Per Message.",
   LIMIT_EXCEEDED_EMAIL_BODY_SIZE: "Limit Exceeded: Email Body Size.",
+  LIMIT_EXCEEDED_EMAIL_SUBJECT_LENGTH: "Argument too large: subject",
   GMAIL_NOT_DEFINED: "\"Gmail\" is not defined.",
   GMAIL_OPERATION_NOT_ALLOWED: "Gmail operation not allowed.",
   
@@ -492,6 +493,7 @@ NORETRY_ERRORS[NORMALIZED_ERRORS.GMAIL_NOT_DEFINED] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.NO_RECIPIENT] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_BODY_SIZE] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_SUBJECT_LENGTH] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.NOT_FOUND] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.BAD_REQUEST] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY] = true;
@@ -659,13 +661,17 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Límite excedido: .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'es'},
   "Limite dépassée : .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'fr'},
   
-  // "Limit Exceeded: Email Recipients Per Message."
+  // "Limit Exceeded: Email Recipients Per Message." - eg: Gmail App.sendEmail
   "Limit Exceeded: Email Recipients Per Message.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE, locale: 'en'},
   "Sınır Aşıldı: İleti Başına E-posta Alıcısı.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE, locale: 'tr'},
   "Đã vượt quá giới hạn: Người nhận email trên mỗi thư.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE, locale: 'vi'},
+  "Límite excedido: Destinatarios de correo electrónico por mensaje.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE, locale: 'es'},
   
-  // "Limit Exceeded: Email Body Size."
+  // "Limit Exceeded: Email Body Size." - eg: Gmail App.sendEmail
   "Limit Exceeded: Email Body Size.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_BODY_SIZE, locale: 'en'},
+  
+  // "Argument too large: subject" - eg: Gmail App.sendEmail
+  "Argument too large: subject": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_SUBJECT_LENGTH, locale: 'en'},
   
   // "User Rate Limit Exceeded" - eg: Gmail.Users.Threads.get
   "User Rate Limit Exceeded": { ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED, locale: 'en'},
