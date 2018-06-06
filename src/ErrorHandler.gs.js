@@ -439,6 +439,7 @@ NORMALIZED_ERRORS = {
   TRYING_TO_EDIT_PROTECTED_CELL: "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.",
   RANGE_NOT_FOUND: "Range not found",
   RANGE_COORDINATES_ARE_OUTSIDE_SHEET_DIMENSIONS: "The coordinates of the range are outside the dimensions of the sheet.",
+  RANGE_COORDINATES_INVALID: "The coordinates or dimensions of the range are invalid.",
   
   // Google Drive
   NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND: "No item with the given ID could be found, or you do not have permission to access it.",
@@ -500,6 +501,8 @@ NORETRY_ERRORS[NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT]
 NORETRY_ERRORS[NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.RANGE_NOT_FOUND] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.RANGE_COORDINATES_ARE_OUTSIDE_SHEET_DIMENSIONS] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.RANGE_COORDINATES_INVALID] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME] = true;
 
 NORETRY_ERRORS[NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED] = true;
@@ -694,14 +697,17 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Você está tentando editar uma célula ou um objeto protegido. Se precisar editar, entre em contato com o proprietário da planilha para remover a proteção.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'pt'},
   "Покушавате да измените заштићену ћелију или објекат. Контактирајте власника табеле да уклони заштиту ако треба да унесете измене.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'sr'},
   
+  // "Range not found"
+  "Range not found": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'en'},
+  "No se ha encontrado el intervalo.": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'es'},
+  
   // "The coordinates of the range are outside the dimensions of the sheet."
   "The coordinates of the range are outside the dimensions of the sheet.": { ref: NORMALIZED_ERRORS.RANGE_COORDINATES_ARE_OUTSIDE_SHEET_DIMENSIONS, locale: 'en'},
   "As coordenadas do intervalo estão fora das dimensões da página.": { ref: NORMALIZED_ERRORS.RANGE_COORDINATES_ARE_OUTSIDE_SHEET_DIMENSIONS, locale: 'pt'},
   "Tọa độ của dải ô nằm ngoài kích thước của trang tính.": { ref: NORMALIZED_ERRORS.RANGE_COORDINATES_ARE_OUTSIDE_SHEET_DIMENSIONS, locale: 'vi'},
   
-  // "Range not found"
-  "Range not found": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'en'},
-  "No se ha encontrado el intervalo.": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'es'},
+  // "The coordinates or dimensions of the range are invalid."
+  "The coordinates or dimensions of the range are invalid.": { ref: NORMALIZED_ERRORS.RANGE_COORDINATES_INVALID, locale: 'en'},
   
   // "No item with the given ID could be found, or you do not have permission to access it." - eg:Drive App.getFileById
   "No item with the given ID could be found, or you do not have permission to access it.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'en'},
