@@ -25,7 +25,7 @@
  *
  * @example
  * // Calls an anonymous function that concatenates a greeting with the current Apps user's email
- * ErrorHandler.expBackoff(function(){return "Hello, " + Session_.getActiveUser().getEmail();});
+ * ErrorHandler.expBackoff(function(){return "Hello, " + Session.getActiveUser().getEmail();});
  *
  * @example
  * // Calls an existing function
@@ -378,10 +378,10 @@ function getNormalizedError(localizedErrorMessage, partialMatches) {
   if (!match) return '';
   
   // Extract partial match variables
-  if (partialMatches && Array.isArray(partialMatches)) {
-    for (var j = 0, variable; variable = matcher.variables[j]; j++) {
+  if (matcher.variables && partialMatches && Array.isArray(partialMatches)) {
+    for (var index = 0, variable; variable = matcher.variables[index]; index++) {
       partialMatches.push({
-        variable: variable, value: match[j + 1] !== undefined && match[j + 1] || ''
+        variable: variable, value: match[index + 1] !== undefined && match[index + 1] || ''
       });
     }
   }
@@ -864,20 +864,20 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED,
     locale: 'en'},
   
-  // Service invoked too many times for one day: XXX. (XXX: urlfetch, email)
-  {regex: /^Service invoked too many times for one day: ([^\.]*)\.$/,
+  // Service invoked too many times for one day: XXX. (XXX: urlFetch, email)
+  {regex: /^Service invoked too many times for one day: ([^.]*)\.$/,
     variables: ['service'],
     ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
     locale: 'en'},
-  {regex: /^Trop d'appels pour ce service aujourd'hui : ([^\.]*)\.$/,
+  {regex: /^Trop d'appels pour ce service aujourd'hui : ([^.]*)\.$/,
     variables: ['service'],
     ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
     locale: 'fr'},
-  {regex: /^Servicio solicitado demasiadas veces en un mismo día: ([^\.]*)\.$/,
+  {regex: /^Servicio solicitado demasiadas veces en un mismo día: ([^.]*)\.$/,
     variables: ['service'],
     ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
     locale: 'es'},
-  {regex: /^Serviço chamado muitas vezes no mesmo dia: ([^\.]*)\.$/,
+  {regex: /^Serviço chamado muitas vezes no mesmo dia: ([^.]*)\.$/,
     variables: ['service'],
     ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
     locale: 'pt'},

@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 * none
 
 
+## [2.1.1] - 2018-06-07
+* new Translations & Errors
+* Fix #10
+
 ## [2.1.0] - 2018-05-30
 * FIX: remove explicit Google Apps Script servine names in comments: avoid auto-adding unused scopes
 * possibility to include script version number in logs
