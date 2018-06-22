@@ -455,6 +455,7 @@ NORMALIZED_ERRORS = {
   IMAP_FEATURES_DISABLED_BY_ADMIN: "IMAP features disabled by administrator",
   LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE: "Limit Exceeded: Email Recipients Per Message.",
   LIMIT_EXCEEDED_EMAIL_BODY_SIZE: "Limit Exceeded: Email Body Size.",
+  LIMIT_EXCEEDED_EMAIL_TOTAL_ATTACHMENTS_SIZE: "Limit Exceeded: Email Total Attachments Size.",
   LIMIT_EXCEEDED_EMAIL_SUBJECT_LENGTH: "Argument too large: subject",
   GMAIL_NOT_DEFINED: "\"Gmail\" is not defined.",
   GMAIL_OPERATION_NOT_ALLOWED: "Gmail operation not allowed.",
@@ -479,6 +480,7 @@ NORMALIZED_ERRORS = {
   USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME: 'User-rate limit exceeded. Retry after specified time.',
   SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY: "Service invoked too many times for one day.",
   SERVICE_UNAVAILABLE: "Service unavailable",
+  SERVICE_ERROR: "Service error",
   INVALID_ARGUMENT: 'Invalid argument',
   SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME: 'A sheet with this name already exists. Please enter another name.',
 };
@@ -493,6 +495,7 @@ NORETRY_ERRORS[NORMALIZED_ERRORS.GMAIL_NOT_DEFINED] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.NO_RECIPIENT] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_BODY_SIZE] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_TOTAL_ATTACHMENTS_SIZE] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_SUBJECT_LENGTH] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.NOT_FOUND] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.BAD_REQUEST] = true;
@@ -656,22 +659,30 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Valeur incorrecte": { ref: NORMALIZED_ERRORS.BAD_VALUE, locale: 'fr'},
   "Valor inválido": { ref: NORMALIZED_ERRORS.BAD_VALUE, locale: 'pt'},
   
-  // "Limit Exceeded: ."
+  // "Limit Exceeded: ." - eg: Gmail App.sendEmail()
   "Limit Exceeded: .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'en'},
   "Límite excedido: .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'es'},
   "Limite dépassée : .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'fr'},
+  "超過上限：。": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'zh_TW'},
   
-  // "Limit Exceeded: Email Recipients Per Message." - eg: Gmail App.sendEmail
+  // "Limit Exceeded: Email Recipients Per Message." - eg: Gmail App.sendEmail()
   "Limit Exceeded: Email Recipients Per Message.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE, locale: 'en'},
   "Sınır Aşıldı: İleti Başına E-posta Alıcısı.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE, locale: 'tr'},
   "Đã vượt quá giới hạn: Người nhận email trên mỗi thư.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE, locale: 'vi'},
   "Límite excedido: Destinatarios de correo electrónico por mensaje.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE, locale: 'es'},
   
-  // "Limit Exceeded: Email Body Size." - eg: Gmail App.sendEmail
+  // "Limit Exceeded: Email Body Size." - eg: Gmail App.sendEmail()
   "Limit Exceeded: Email Body Size.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_BODY_SIZE, locale: 'en'},
+  "Límite Excedido: Tamaño del cuerpo del mensaje.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_BODY_SIZE, locale: 'es_PE'},
   
-  // "Argument too large: subject" - eg: Gmail App.sendEmail
+  // "Limit Exceeded: Email Total Attachments Size." - eg: Gmail App.sendEmail()
+  "Limit Exceeded: Email Total Attachments Size.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_TOTAL_ATTACHMENTS_SIZE, locale: 'en'},
+  "Límite excedido: Tamaño total de los archivos adjuntos del correo electrónico.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_TOTAL_ATTACHMENTS_SIZE, locale: 'es'},
+  
+  // "Argument too large: subject" - eg: Gmail App.sendEmail()
   "Argument too large: subject": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_SUBJECT_LENGTH, locale: 'en'},
+  "Argument trop grand : subject": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_SUBJECT_LENGTH, locale: 'fr'},
+  "Argumento demasiado grande: subject": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_SUBJECT_LENGTH, locale: 'es'},
   
   // "User Rate Limit Exceeded" - eg: Gmail.Users.Threads.get
   "User Rate Limit Exceeded": { ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED, locale: 'en'},
@@ -703,9 +714,14 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Você está tentando editar uma célula ou um objeto protegido. Se precisar editar, entre em contato com o proprietário da planilha para remover a proteção.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'pt'},
   "Покушавате да измените заштићену ћелију или објекат. Контактирајте власника табеле да уклони заштиту ако треба да унесете измене.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'sr'},
   
-  // "Range not found"
+  // "Range not found" - eg: Range.getValue()
   "Range not found": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'en'},
+  "Range  not found": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'en_GB'},
   "No se ha encontrado el intervalo.": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'es'},
+  "Intervalo não encontrado": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'pt'},
+  "Không tìm thấy dải ô": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'vi'},
+  "Plage introuvable": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'fr'},
+  "Vahemikku ei leitud": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'et'},
   
   // "The coordinates of the range are outside the dimensions of the sheet."
   "The coordinates of the range are outside the dimensions of the sheet.": { ref: NORMALIZED_ERRORS.RANGE_COORDINATES_ARE_OUTSIDE_SHEET_DIMENSIONS, locale: 'en'},
@@ -817,7 +833,7 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     ref: NORMALIZED_ERRORS.INVALID_EMAIL,
     locale: 'nl'},
       
-  // Document XXX is missing (perhaps it was deleted?)
+  // Document XXX is missing (perhaps it was deleted?) - eg: Spreadsheet App.openById()
   {regex: /^Document (\S*) is missing \(perhaps it was deleted\?\)$/,
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
@@ -841,7 +857,7 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
   {regex: /^Документ (\S*) отсутствует \(возможно, он был удален\)$/,
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
-    locale: 'ru'},  
+    locale: 'ru'},
   {regex: /^Le document (\S*) est manquant \(peut-être a-t-il été supprimé \?\)$/,
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
@@ -850,7 +866,27 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
     locale: 'in'},
-                
+  {regex: /^Das Dokument (\S*) fehlt\. \(Vielleicht wurde es gelöscht\?\)$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
+    locale: 'de'},
+  {regex: /^O documento (\S*) está ausente \(será que foi excluído\?\)$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
+    locale: 'pt'},
+  {regex: /^Chybí dokument (\S*) \(je možné, že byl smazán\)\.$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
+    locale: 'cs'},
+  {regex: /^Nema dokumenta (\S*) \(možda je izbrisan\?\)$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
+    locale: 'hr'},
+  {regex: /^A\(z\) (\S*) dokumentum hiányzik \(talán törölték\?\)$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
+    locale: 'hu'},
+                          
   // User-rate limit exceeded. Retry after XXX - this error can be prefixed with a translated version of 'Limit Exceeded'
   {regex: /User-rate limit exceeded\.\s+Retry after (.*Z)/,
     variables: ['timestamp'],
@@ -881,12 +917,26 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['service'],
     ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
     locale: 'pt'},
-  
+  {regex: /^Dịch vụ bị gọi quá nhiều lần trong một ngày: ([^.]*)\.$/,
+    variables: ['service'],
+    ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
+    locale: 'vi'},
+    
   // Service unavailable: XXX (XXX: Docs)
   {regex: /^Service unavailable: (.*)$/,
     variables: ['service'],
     ref: NORMALIZED_ERRORS.SERVICE_UNAVAILABLE,
     locale: 'en'},
+  
+  // Service error: XXX (XXX: Spreadsheets)
+  {regex: /^Service error: (.*)$/,
+    variables: ['service'],
+    ref: NORMALIZED_ERRORS.SERVICE_ERROR,
+    locale: 'en'},
+  {regex: /^Erro de serviço: (.*)$/,
+    variables: ['service'],
+    ref: NORMALIZED_ERRORS.SERVICE_ERROR,
+    locale: 'pt'},
   
   // "Invalid argument: XXX" - wrong email alias used - eg: Gmail App.sendEmail()
   {regex: /^Invalid argument: (.*)$/,
@@ -902,7 +952,7 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
   {regex: /^A sheet with the name ‘([^’]*)’ already exists\. Please enter another name\.$/,
     variables: ['sheetName'],
     ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
-    locale: 'en_NZ'},  
+    locale: 'en_NZ'},
   {regex: /^Ya existe una hoja con el nombre "([^"]*)"\. Ingresa otro\.$/,
     variables: ['sheetName'],
     ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
@@ -910,7 +960,7 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
   {regex: /^Ya existe una hoja con el nombre "([^"]*)"\. Introduce un nombre distinto\.$/,
     variables: ['sheetName'],
     ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
-    locale: 'es'},  
+    locale: 'es'},
   {regex: /^Đã tồn tại một trang tính có tên "([^"]*)"\. Vui lòng nhập tên khác\.$/,
     variables: ['sheetName'],
     ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
@@ -919,6 +969,10 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['sheetName'],
     ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
     locale: 'fr'},
+  {regex: /^Une feuille nommée « ([^»]*)» existe déjà\. Veuillez saisir un autre nom\.$/,
+    variables: ['sheetName'],
+    ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
+    locale: 'fr_CA'},
   {regex: /^Esiste già un foglio con il nome "([^"]*)"\. Inserisci un altro nome\.$/,
     variables: ['sheetName'],
     ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
@@ -939,6 +993,22 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['sheetName'],
     ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
     locale: 'ja'},
+  {regex: /^Er is al een blad met de naam ([^.]*)\. Geef een andere naam op\.$/,
+    variables: ['sheetName'],
+    ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
+    locale: 'nl'},
+  {regex: /^Já existe uma página chamada "([^"]*)"\. Insira outro nome\.$/,
+    variables: ['sheetName'],
+    ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
+    locale: 'pt'},
+  {regex: /^Лист "([^"]*)" уже существует\. Введите другое название\.$/,
+    variables: ['sheetName'],
+    ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
+    locale: 'ru'},
+  {regex: /^Hárok s názvom ([^ž]*) už existuje\. Zadajte iný názov\.$/,
+    variables: ['sheetName'],
+    ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
+    locale: 'sk'},  
 ];
 
 /**
