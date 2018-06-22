@@ -473,6 +473,7 @@ NORMALIZED_ERRORS = {
   BACKEND_ERROR: "Backend Error",
   UNABLE_TO_TALK_TO_TRIGGER_SERVICE: "Unable to talk to trigger service",
   ACTION_NOT_ALLOWED_THROUGH_EXEC_API: "Script has attempted to perform an action that is not allowed when invoked through the Google Apps Script Execution API.",
+  TOO_MANY_LOCK_OPERATIONS: "There are too many LockService operations against the same script.",
   
   // Partial match error
   INVALID_EMAIL: 'Invalid email',
@@ -801,6 +802,10 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   
   // "IMAP features disabled by administrator"
   "IMAP features disabled by administrator": { ref: NORMALIZED_ERRORS.IMAP_FEATURES_DISABLED_BY_ADMIN, locale: 'en'},
+  
+  // "There are too many LockService operations against the same script." - eg: Lock.tryLock()
+  "There are too many LockService operations against the same script.": { ref: NORMALIZED_ERRORS.TOO_MANY_LOCK_OPERATIONS, locale: 'en'},
+  "Có quá nhiều thao tác LockService trên cùng một tập lệnh.": { ref: NORMALIZED_ERRORS.TOO_MANY_LOCK_OPERATIONS, locale: 'vi'},
 };
 
 /**
