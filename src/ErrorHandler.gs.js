@@ -10,7 +10,7 @@
  * logError()
  * getNormalizedError()
  * getErrorLocale()
- * 
+ *
  * NORMALIZED_ERRORS
  * NORETRY_ERRORS
  *****************************************************************/
@@ -42,50 +42,50 @@
  * @return {* | ErrorHandler_.CustomError} - The value returned by the called function, or ErrorHandler_.CustomError on failure if throwOnFailure == false
  */
 function expBackoff(func, options) {
-  
+
   // enforce defaults
   options = options || {};
-  
+
   var retry = options.retryNumber || 5;
   if (retry < 1 || retry > 6) retry = 5;
-  
+
   var previousError = null;
   var retryDelay = null;
   var oldRetryDelay = null;
   var customError;
-  
+
   // execute func() then retry <retry> times at most if errors
   for (var n = 0; n <= retry; n++) {
     // actual exponential backoff
     n && Utilities.sleep(retryDelay || (Math.pow(2, n-1) * 1000) + (Math.round(Math.random() * 1000)));
-    
+
     var response = undefined;
     var error = undefined;
-    
+
     var noError = true;
     var isUrlFetchResponse = false;
-    
+
     // Try / catch func()
     try { response = func() }
     catch(err) {
       error = err;
       noError = false;
     }
-    
-    
+
+
     // Handle retries on UrlFetch calls with muteHttpExceptions
     if (noError && response && typeof response.getResponseCode === "function") {
       isUrlFetchResponse = true;
-      
+
       var responseCode = response.getResponseCode();
-      
+
       // Only perform retries on error 500 for now
       if (responseCode === 500) {
         error = response;
         noError = false;
       }
     }
-    
+
     // Return result that is not an error
     if (noError) {
       if (n && options.verbose){
@@ -94,31 +94,31 @@ function expBackoff(func, options) {
           successful: true,
           numberRetry: n,
         };
-        
+
         retryDelay && (info.retryDelay = retryDelay);
-        
+
         ErrorHandler.logError(previousError, info, {
           asWarning: true,
           doNotLogKnownErrors: options.doNotLogKnownErrors,
         });
       }
-      
+
       return response;
     }
     previousError = error;
     oldRetryDelay = retryDelay;
     retryDelay = null;
-    
-    
+
+
     // Process error retry
     if (!isUrlFetchResponse && error.message) {
       var variables = [];
       var normalizedError = ErrorHandler.getNormalizedError(error.message, variables);
-      
+
       // If specific error that explicitly give the retry time
       if (normalizedError === ErrorHandler.NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME && variables[0] && variables[0].value) {
         retryDelay = (new Date(variables[0].value) - new Date()) + 1000;
-        
+
         oldRetryDelay && ErrorHandler.logError(error, {
           failReason: 'Failed after waiting '+ oldRetryDelay +'ms',
           context: "Exponential Backoff",
@@ -128,39 +128,39 @@ function expBackoff(func, options) {
           asWarning: true,
           doNotLogKnownErrors: options.doNotLogKnownErrors,
         });
-        
+
         // Do not wait too long
         if (retryDelay < 32000) continue;
-        
+
         customError = ErrorHandler.logError(error, {
           failReason: 'Retry delay > 31s',
           context: "Exponential Backoff",
           numberRetry: n,
           retryDelay: retryDelay,
         }, {doNotLogKnownErrors: options.doNotLogKnownErrors});
-        
+
         if (options.throwOnFailure) throw customError;
         return customError;
       }
-      
+
       // Check for errors thrown by Google APIs on which there's no need to retry
       // eg: "Access denied by a security policy established by the administrator of your organization. 
       //      Please contact your administrator for further assistance."
       if (!ErrorHandler.NORETRY_ERRORS[normalizedError]) continue;
-      
+
       customError = ErrorHandler.logError(error, {
         failReason: 'No retry needed',
         numberRetry: n,
         context: "Exponential Backoff"
       }, {doNotLogKnownErrors: options.doNotLogKnownErrors});
-      
+
       if (options.throwOnFailure) throw customError;
       return customError;
     }
-    
+
   }
-  
-  
+
+
   // Action after last re-try
   if (isUrlFetchResponse) {
     ErrorHandler.logError(new Error(response.getContentText()), {
@@ -168,18 +168,18 @@ function expBackoff(func, options) {
       urlFetchWithMuteHttpExceptions: true,
       context: "Exponential Backoff"
     }, {doNotLogKnownErrors: options.doNotLogKnownErrors});
-    
+
     return response;
   }
-  
-  
+
+
   // Investigate on errors that are still happening after 5 retries
   // Especially error "Not Found" - does it make sense to retry on it?
   customError = ErrorHandler.logError(error, {
     failReason: 'Max retries reached',
     context: "Exponential Backoff"
   }, {doNotLogKnownErrors: options.doNotLogKnownErrors});
-  
+
   if (options.throwOnFailure) throw customError;
   return customError;
 }
@@ -194,9 +194,9 @@ function expBackoff(func, options) {
  */
 function urlFetchWithExpBackOff(url, params) {
   params = params || {};
-  
+
   params.muteHttpExceptions = true;
-  
+
   return ErrorHandler.expBackoff(function(){
     return UrlFetchApp.fetch(url, params);
   });
@@ -234,14 +234,14 @@ function urlFetchWithExpBackOff(url, params) {
  */
 function logError(error, additionalParams, options) {
   options = options || {};
-  
+
   error = (typeof error === 'string') ? new Error(error) : error;
-  
+
   // Localize error message
   var partialMatches = [];
   var normalizedMessage = ErrorHandler.getNormalizedError(error.message, partialMatches);
   var message = normalizedMessage || error.message;
-  
+
   var locale;
   var scriptId;
   try {
@@ -252,7 +252,7 @@ function logError(error, additionalParams, options) {
     // Try to add the locale
     locale = ErrorHandler.getErrorLocale(error.message);
   }
-  
+
   var log = {
     context: {
       locale: locale || '',
@@ -260,17 +260,17 @@ function logError(error, additionalParams, options) {
       knownError: !!normalizedMessage,
     }
   };
-  
-  
+
+
   // Add partialMatches if any
   if (partialMatches.length) {
     log.context.variables = {};
-    
+
     partialMatches.forEach(function (match) {
       log.context.variables[match.variable] = match.value;
     });
   }
-  
+
   if (error.name) {
     // examples of error name: Error, ReferenceError, Exception, GoogleJsonResponseException, HttpResponseException
     // would be nice to categorize
@@ -284,30 +284,30 @@ function logError(error, additionalParams, options) {
     message = error.name + ": " + message;
   }
   log.message = message;
-  
+
   // allow to use a global variable instead of passing the addonName in each call
   // noinspection JSUnresolvedVariable
   var addonName = additionalParams && additionalParams.addonName || ErrorHandler_._this['SCRIPT_PROJECT_TITLE'] || '';
-  
+
   // Manage error Stack
   if (error.lineNumber && error.fileName && error.stack) {
     var fileName = addonName && error.fileName.replace(' ('+ addonName +')', '') || error.fileName;
-    
+
     log.context.reportLocation = {
       lineNumber: error.lineNumber,
       filePath: fileName,
       directLink: 'https://script.google.com/macros/d/'+ scriptId +'/edit?f='+ fileName +'&s='+ error.lineNumber
     };
-    
+
     var res = ErrorHandler_._convertErrorStack(error.stack, addonName);
     log.context.reportLocation.functionName = res.lastFunctionName;
     log.message+= '\n    '+ res.stack;
   }
-  
+
   if (error.responseCode) {
     log.context.responseCode = error.responseCode;
   }
-  
+
   // allow to use a global variable instead of passing the addonName in each call
   // noinspection JSUnresolvedVariable
   var versionNumber = additionalParams && additionalParams.versionNumber || ErrorHandler_._this['SCRIPT_VERSION_DEPLOYED'] || '';
@@ -316,26 +316,26 @@ function logError(error, additionalParams, options) {
       version: versionNumber
     };
   }
-  
+
   // Add custom information
   if (additionalParams) {
     log.customParams = {};
-    
+
     for (var i in additionalParams) {
       log.customParams[i] = additionalParams[i];
     }
   }
-  
+
   // Send error to stackdriver log
   if (!options.doNotLogKnownErrors || !normalizedMessage) {
     if (options.asWarning) console.warn(log);
     else console.error(log);
   }
-  
+
   // Return an error, with context
   var customError = new Error(normalizedMessage || error.message);
   customError.context = log.context;
-  
+
   return customError;
 }
 
@@ -356,27 +356,27 @@ function getNormalizedError(localizedErrorMessage, partialMatches) {
    * @type {ErrorHandler_.ErrorMatcher}
    */
   var error = ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS[localizedErrorMessage];
-  
+
   if (error) return error.ref;
   if (typeof localizedErrorMessage !== 'string') return '';
-  
+
   // No exact match, try to execute a partial match
   var match;
-  
+
   /**
    * @type {ErrorHandler_.PartialMatcher}
    */
   var matcher;
-  
+
   for (var i = 0; matcher = ErrorHandler_._ERROR_PARTIAL_MATCH[i]; i++) {
     // search for a match
     match = localizedErrorMessage.match(matcher.regex);
     if (match) break;
   }
-  
+
   // No match found
   if (!match) return '';
-  
+
   // Extract partial match variables
   if (matcher.variables && partialMatches && Array.isArray(partialMatches)) {
     for (var index = 0, variable; variable = matcher.variables[index]; index++) {
@@ -385,7 +385,7 @@ function getNormalizedError(localizedErrorMessage, partialMatches) {
       });
     }
   }
-  
+
   return matcher.ref;
 }
 
@@ -401,27 +401,27 @@ function getErrorLocale(localizedErrorMessage) {
    * @type {ErrorHandler_.ErrorMatcher}
    */
   var error = ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS[localizedErrorMessage];
-  
+
   if (error) return error.locale;
   if (typeof localizedErrorMessage !== 'string') return '';
-  
+
   // No exact match, try to execute a partial match
   var match;
-  
+
   /**
    * @type {ErrorHandler_.PartialMatcher}
    */
   var matcher;
-  
+
   for (var i = 0; matcher = ErrorHandler_._ERROR_PARTIAL_MATCH[i]; i++) {
     // search for a match
     match = localizedErrorMessage.match(matcher.regex);
     if (match) break;
   }
-  
+
   // No match found
   if (!match) return '';
-  
+
   return matcher.locale;
 }
 
@@ -440,11 +440,11 @@ NORMALIZED_ERRORS = {
   RANGE_NOT_FOUND: "Range not found",
   RANGE_COORDINATES_ARE_OUTSIDE_SHEET_DIMENSIONS: "The coordinates of the range are outside the dimensions of the sheet.",
   RANGE_COORDINATES_INVALID: "The coordinates or dimensions of the range are invalid.",
-  
+
   // Google Drive
   NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND: "No item with the given ID could be found, or you do not have permission to access it.",
   NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT: "You do not have permissions to access the requested document.",
-  
+
   // Gmail / email service
   MAIL_SERVICE_NOT_ENABLED: "Mail service not enabled",
   INVALID_THREAD_ID_VALUE: "Invalid thread_id value",
@@ -459,7 +459,7 @@ NORMALIZED_ERRORS = {
   LIMIT_EXCEEDED_EMAIL_SUBJECT_LENGTH: "Argument too large: subject",
   GMAIL_NOT_DEFINED: "\"Gmail\" is not defined.",
   GMAIL_OPERATION_NOT_ALLOWED: "Gmail operation not allowed.",
-  
+
   // miscellaneous
   SERVER_ERROR_RETRY_LATER: "We're sorry, a server error occurred. Please wait a bit and try again.",
   AUTHORIZATION_REQUIRED: "Authorization is required to perform that action. Please run the script again to authorize it.",
@@ -474,7 +474,7 @@ NORMALIZED_ERRORS = {
   UNABLE_TO_TALK_TO_TRIGGER_SERVICE: "Unable to talk to trigger service",
   ACTION_NOT_ALLOWED_THROUGH_EXEC_API: "Script has attempted to perform an action that is not allowed when invoked through the Google Apps Script Execution API.",
   TOO_MANY_LOCK_OPERATIONS: "There are too many LockService operations against the same script.",
-  
+
   // Partial match error
   INVALID_EMAIL: 'Invalid email',
   DOCUMENT_MISSING: 'Document is missing (perhaps it was deleted?)',
@@ -523,7 +523,7 @@ this['ErrorHandler'] = {
   expBackoff: expBackoff,
   urlFetchWithExpBackOff: urlFetchWithExpBackOff,
   logError: logError,
-  
+
   getNormalizedError: getNormalizedError,
   getErrorLocale: getErrorLocale,
   NORMALIZED_ERRORS: NORMALIZED_ERRORS,
@@ -553,20 +553,20 @@ ErrorHandler_._this = this;
  *   lastFunctionName: string
  * }} - formatted stack and last functionName executed
  */
-ErrorHandler_._convertErrorStack = function (stack, addonName) {  
+ErrorHandler_._convertErrorStack = function (stack, addonName) {
   var formattedStack = [];
   var lastFunctionName = '';
   var res;
   var regex = new RegExp('at\\s([^:]+?)'+ (addonName ? '(?:\\s\\('+ addonName +'\\))?' : '') +':(\\d+)(?:\\s\\(([^)]+)\\))?', 'gm');
-  
+
   while (res = regex.exec(stack)) {
     var [/* total match */, fileName, lineNumber, functionName] = res;
-    
+
     if (!lastFunctionName) lastFunctionName = functionName || '';
-    
+
     formattedStack.push('at '+ (functionName || '[unknown function]') +'('+ fileName +':'+ lineNumber +')');
   }
-  
+
   return {
     stack: formattedStack.join('\n    '),
     lastFunctionName: lastFunctionName
@@ -622,7 +622,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Regula cu format condiționat nu poate face referire la altă foaie.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'ro'},
   "Tingimusvormingu reegel ei saa viidata teisele lehele.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'et'},
   "Правило за условно обликовање не може да указује на другу табелу.": { ref: NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET, locale: 'sr'},
-  
+
   // "We're sorry, a server error occurred. Please wait a bit and try again."
   "We're sorry, a server error occurred. Please wait a bit and try again.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'en'},
   "Spiacenti. Si è verificato un errore del server. Attendi e riprova.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'it'},
@@ -637,13 +637,13 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Ett serverfel uppstod. Vänta lite och försök igen.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'sv'},
   "A apărut o eroare de server. Așteptați puțin și încercați din nou.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'ro'},
   "Ein Serverfehler ist aufgetreten. Bitte versuchen Sie es später erneut.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'de'},
-  
+
   // "Authorization is required to perform that action. Please run the script again to authorize it."
   "Authorization is required to perform that action. Please run the script again to authorize it.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'en'},
   "Autorisation requise pour exécuter cette action. Exécutez à nouveau le script pour autoriser cette action.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'fr'},
   "Cần được cho phép để thực hiện tác vụ đó. Hãy chạy lại tập lệnh để cho phép tác vụ.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'vi'},
   "É necessária autorização para executar esta ação. Execute o script novamente para autorizar a ação.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'pt'},
-  
+
   // "Empty response"
   "Empty response": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'en'},
   "Respuesta vacía": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'es'},
@@ -652,7 +652,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Resposta vazia": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'pt'},
   "Prázdná odpověď": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'cs'},
   "Răspuns gol": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'ro_MD'},
-  
+
   // "Bad value"
   "Bad value": { ref: NORMALIZED_ERRORS.BAD_VALUE, locale: 'en'},
   "Helytelen érték": { ref: NORMALIZED_ERRORS.BAD_VALUE, locale: 'hu'},
@@ -660,38 +660,38 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Giá trị không hợp lệ": { ref: NORMALIZED_ERRORS.BAD_VALUE, locale: 'vi'},
   "Valeur incorrecte": { ref: NORMALIZED_ERRORS.BAD_VALUE, locale: 'fr'},
   "Valor inválido": { ref: NORMALIZED_ERRORS.BAD_VALUE, locale: 'pt'},
-  
+
   // "Limit Exceeded: ." - eg: Gmail App.sendEmail()
   "Limit Exceeded: .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'en'},
   "Límite excedido: .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'es'},
   "Limite dépassée : .": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'fr'},
   "超過上限：。": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED, locale: 'zh_TW'},
-  
+
   // "Limit Exceeded: Email Recipients Per Message." - eg: Gmail App.sendEmail()
   "Limit Exceeded: Email Recipients Per Message.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE, locale: 'en'},
   "Sınır Aşıldı: İleti Başına E-posta Alıcısı.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE, locale: 'tr'},
   "Đã vượt quá giới hạn: Người nhận email trên mỗi thư.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE, locale: 'vi'},
   "Límite excedido: Destinatarios de correo electrónico por mensaje.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_MAX_RECIPIENTS_PER_MESSAGE, locale: 'es'},
-  
+
   // "Limit Exceeded: Email Body Size." - eg: Gmail App.sendEmail()
   "Limit Exceeded: Email Body Size.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_BODY_SIZE, locale: 'en'},
   "Límite Excedido: Tamaño del cuerpo del mensaje.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_BODY_SIZE, locale: 'es_PE'},
-  
+
   // "Limit Exceeded: Email Total Attachments Size." - eg: Gmail App.sendEmail()
   "Limit Exceeded: Email Total Attachments Size.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_TOTAL_ATTACHMENTS_SIZE, locale: 'en'},
   "Límite excedido: Tamaño total de los archivos adjuntos del correo electrónico.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_TOTAL_ATTACHMENTS_SIZE, locale: 'es'},
-  
+
   // "Argument too large: subject" - eg: Gmail App.sendEmail()
   "Argument too large: subject": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_SUBJECT_LENGTH, locale: 'en'},
   "Argument trop grand : subject": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_SUBJECT_LENGTH, locale: 'fr'},
   "Argumento demasiado grande: subject": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_SUBJECT_LENGTH, locale: 'es'},
-  
+
   // "User Rate Limit Exceeded" - eg: Gmail.Users.Threads.get
   "User Rate Limit Exceeded": { ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED, locale: 'en'},
-  
+
   // "Rate Limit Exceeded" - eg: Gmail.Users.Messages.send
   "Rate Limit Exceeded": { ref: NORMALIZED_ERRORS.RATE_LIMIT_EXCEEDED, locale: 'en'},
-  
+
   // "Not Found"
   // with uppercase "f" when calling Gmail.Users.Messages or Gmail.Users.Drafts endpoints
   "Not Found": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'en'},
@@ -699,13 +699,13 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Not found": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'en'},
   "Não encontrado": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'pt_PT'},
   "No se ha encontrado.": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'es'},
-  
+
   // "Bad Request" - eg: all 'list' requests from Gmail advanced service, maybe if there are 0 messages in Gmail (new account)
   "Bad Request": { ref: NORMALIZED_ERRORS.BAD_REQUEST, locale: 'en'},
-  
+
   // "Backend Error"
   "Backend Error": { ref: NORMALIZED_ERRORS.BACKEND_ERROR, locale: 'en'},
-  
+
   // "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit."
   "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'en'},
   "保護されているセルやオブジェクトを編集しようとしています。編集する必要がある場合は、スプレッドシートのオーナーに連絡して保護を解除してもらってください。": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'ja'},
@@ -715,7 +715,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Estás intentando modificar una celda o un objeto protegido. Si necesitas realizar cambios, comunícate con el propietario de la hoja de cálculo para que quite la protección.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'es_MX'},
   "Você está tentando editar uma célula ou um objeto protegido. Se precisar editar, entre em contato com o proprietário da planilha para remover a proteção.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'pt'},
   "Покушавате да измените заштићену ћелију или објекат. Контактирајте власника табеле да уклони заштиту ако треба да унесете измене.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'sr'},
-  
+
   // "Range not found" - eg: Range.getValue()
   "Range not found": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'en'},
   "Range  not found": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'en_GB'},
@@ -724,15 +724,15 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Không tìm thấy dải ô": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'vi'},
   "Plage introuvable": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'fr'},
   "Vahemikku ei leitud": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'et'},
-  
+
   // "The coordinates of the range are outside the dimensions of the sheet."
   "The coordinates of the range are outside the dimensions of the sheet.": { ref: NORMALIZED_ERRORS.RANGE_COORDINATES_ARE_OUTSIDE_SHEET_DIMENSIONS, locale: 'en'},
   "As coordenadas do intervalo estão fora das dimensões da página.": { ref: NORMALIZED_ERRORS.RANGE_COORDINATES_ARE_OUTSIDE_SHEET_DIMENSIONS, locale: 'pt'},
   "Tọa độ của dải ô nằm ngoài kích thước của trang tính.": { ref: NORMALIZED_ERRORS.RANGE_COORDINATES_ARE_OUTSIDE_SHEET_DIMENSIONS, locale: 'vi'},
-  
+
   // "The coordinates or dimensions of the range are invalid."
   "The coordinates or dimensions of the range are invalid.": { ref: NORMALIZED_ERRORS.RANGE_COORDINATES_INVALID, locale: 'en'},
-  
+
   // "No item with the given ID could be found, or you do not have permission to access it." - eg:Drive App.getFileById
   "No item with the given ID could be found, or you do not have permission to access it.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'en'},
   "Không tìm thấy mục nào có ID đã cung cấp hoặc bạn không có quyền truy cập vào mục đó.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'vi'},
@@ -750,7 +750,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "指定された ID のアイテムは見つからなかったか、アクセスする権限がありません。": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'ja'},
   "Не вдалося знайти елемент із зазначеним ідентифікатором. Або у вас немає дозволу на доступ до нього.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'uk'},
   "Verilen kimliğe sahip öğe bulunamadı veya bu öğeye erişme iznine sahip değilsiniz.": { ref: NORMALIZED_ERRORS.NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND, locale: 'tr'},
-  
+
   // "You do not have permissions to access the requested document."
   "You do not have permissions to access the requested document.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'en'},
   "Bạn không có quyền truy cập tài liệu yêu cầu.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'vi'},
@@ -758,52 +758,53 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Vous n'avez pas l'autorisation d'accéder au document demandé.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'fr'},
   "Non disponi dell'autorizzazione necessaria per accedere al documento richiesto.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'it'},
   "No cuenta con los permisos necesarios para acceder al documento solicitado.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'es_CO'},
-  
+
   // "Unable to talk to trigger service"
   "Unable to talk to trigger service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'en'},
   "Impossible de communiquer pour déclencher le service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'fr'},
   "Không thể trao đổi với người môi giới để kích hoạt dịch vụ": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'vi'},
   "No es posible ponerse en contacto con el servicio de activación.": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'es'},
   "無法與觸發服務聯絡": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'zh_TW'},
-  
+
   // "Script has attempted to perform an action that is not allowed when invoked through the Google Apps Script Execution API."
   "Script has attempted to perform an action that is not allowed when invoked through the Google Apps Script Execution API.": { ref: NORMALIZED_ERRORS.ACTION_NOT_ALLOWED_THROUGH_EXEC_API, locale: 'en'},
-  
+
   // "Mail service not enabled"
   "Mail service not enabled": { ref: NORMALIZED_ERRORS.MAIL_SERVICE_NOT_ENABLED, locale: 'en'},
-  
+  "Gmail operation not allowed. : Mail service not enabled": { ref: NORMALIZED_ERRORS.MAIL_SERVICE_NOT_ENABLED, locale: 'en'},
+
   // This error happens because the Gmail advanced service was not properly loaded during this Apps Script process execution
   // In this case, we need to start a new process execution, ie restart exec from client side - no need to retry multiple times
   "\"Gmail\" is not defined.": { ref: NORMALIZED_ERRORS.GMAIL_NOT_DEFINED, locale: 'en'},
-  
+
   // "Gmail operation not allowed." - eg: Gmail App.sendEmail()
   "Gmail operation not allowed.": { ref: NORMALIZED_ERRORS.GMAIL_OPERATION_NOT_ALLOWED, locale: 'en'},
-  
+
   // "Invalid thread_id value"
   "Invalid thread_id value": { ref: NORMALIZED_ERRORS.INVALID_THREAD_ID_VALUE, locale: 'en'},
-  
+
   // "labelId not found"
   "labelId not found": { ref: NORMALIZED_ERRORS.LABEL_ID_NOT_FOUND, locale: 'en'},
-  
+
   // "Label name exists or conflicts"
   "Label name exists or conflicts": { ref: NORMALIZED_ERRORS.LABEL_NAME_EXISTS_OR_CONFLICTS, locale: 'en'},
-  
+
   // "Invalid label name"
   "Invalid label name": { ref: NORMALIZED_ERRORS.INVALID_LABEL_NAME, locale: 'en'},
-  
+
   // "Invalid to header" - eg: Gmail.Users.Messages.send
   "Invalid to header": { ref: NORMALIZED_ERRORS.INVALID_EMAIL, locale: 'en'},
   // "Invalid cc header" - eg: Gmail.Users.Messages.send
-  "Invalid cc header": { ref: NORMALIZED_ERRORS.INVALID_EMAIL, locale: 'en'},  
-  
+  "Invalid cc header": { ref: NORMALIZED_ERRORS.INVALID_EMAIL, locale: 'en'},
+
   // "Failed to send email: no recipient" - eg: Gmail App.sendEmail()
   "Failed to send email: no recipient": { ref: NORMALIZED_ERRORS.NO_RECIPIENT, locale: 'en'},
   // "Recipient address required" - eg: Gmail.Users.Messages.send()
   "Recipient address required": { ref: NORMALIZED_ERRORS.NO_RECIPIENT, locale: 'en'},
-  
+
   // "IMAP features disabled by administrator"
   "IMAP features disabled by administrator": { ref: NORMALIZED_ERRORS.IMAP_FEATURES_DISABLED_BY_ADMIN, locale: 'en'},
-  
+
   // "There are too many LockService operations against the same script." - eg: Lock.tryLock()
   "There are too many LockService operations against the same script.": { ref: NORMALIZED_ERRORS.TOO_MANY_LOCK_OPERATIONS, locale: 'en'},
   "Có quá nhiều thao tác LockService trên cùng một tập lệnh.": { ref: NORMALIZED_ERRORS.TOO_MANY_LOCK_OPERATIONS, locale: 'vi'},
@@ -838,7 +839,7 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['email'],
     ref: NORMALIZED_ERRORS.INVALID_EMAIL,
     locale: 'nl'},
-      
+
   // Document XXX is missing (perhaps it was deleted?) - eg: Spreadsheet App.openById()
   {regex: /^Document (\S*) is missing \(perhaps it was deleted\?\)$/,
     variables: ['docId'],
@@ -859,7 +860,7 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
   {regex: /^找不到文件「([^」]*)」\(可能已遭刪除\)$/,
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
-    locale: 'zh_TW'},  
+    locale: 'zh_TW'},
   {regex: /^Документ (\S*) отсутствует \(возможно, он был удален\)$/,
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
@@ -892,20 +893,20 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
     locale: 'hu'},
-                          
+
   // User-rate limit exceeded. Retry after XXX - this error can be prefixed with a translated version of 'Limit Exceeded'
   {regex: /User-rate limit exceeded\.\s+Retry after (.*Z)/,
     variables: ['timestamp'],
     ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
     locale: 'en'},
-  
+
   // User Rate Limit Exceeded. Rate of requests for user exceed configured project quota. 
   // You may consider re-evaluating expected per-user traffic to the API and adjust project quota limits accordingly. 
   // You may monitor aggregate quota usage and adjust limits in the API Console: https://console.developers.google.com/XXX
   {regex: /User Rate Limit Exceeded\. Rate of requests for user exceed configured project quota\./,
     ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED,
     locale: 'en'},
-  
+
   // Service invoked too many times for one day: XXX. (XXX: urlFetch, email)
   {regex: /^Service invoked too many times for one day: ([^.]*)\.$/,
     variables: ['service'],
@@ -927,13 +928,13 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['service'],
     ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
     locale: 'vi'},
-    
+
   // Service unavailable: XXX (XXX: Docs)
   {regex: /^Service unavailable: (.*)$/,
     variables: ['service'],
     ref: NORMALIZED_ERRORS.SERVICE_UNAVAILABLE,
     locale: 'en'},
-  
+
   // Service error: XXX (XXX: Spreadsheets)
   {regex: /^Service error: (.*)$/,
     variables: ['service'],
@@ -943,13 +944,13 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['service'],
     ref: NORMALIZED_ERRORS.SERVICE_ERROR,
     locale: 'pt'},
-  
+
   // "Invalid argument: XXX" - wrong email alias used - eg: Gmail App.sendEmail()
   {regex: /^Invalid argument: (.*)$/,
     variables: ['email'],
     ref: NORMALIZED_ERRORS.INVALID_ARGUMENT,
     locale: 'en'},
-  
+
   // "A sheet with the name "XXX" already exists. Please enter another name." - eg: [Sheet].setName()
   {regex: /^A sheet with the name "([^"]*)" already exists\. Please enter another name\.$/,
     variables: ['sheetName'],
@@ -1014,7 +1015,7 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
   {regex: /^Hárok s názvom ([^ž]*) už existuje\. Zadajte iný názov\.$/,
     variables: ['sheetName'],
     ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
-    locale: 'sk'},  
+    locale: 'sk'},
 ];
 
 /**
