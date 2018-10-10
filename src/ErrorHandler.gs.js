@@ -144,7 +144,7 @@ function expBackoff(func, options) {
       }
 
       // Check for errors thrown by Google APIs on which there's no need to retry
-      // eg: "Access denied by a security policy established by the administrator of your organization. 
+      // eg: "Access denied by a security policy established by the administrator of your organization.
       //      Please contact your administrator for further assistance."
       if (!ErrorHandler.NORETRY_ERRORS[normalizedError]) continue;
 
@@ -460,6 +460,9 @@ NORMALIZED_ERRORS = {
   GMAIL_NOT_DEFINED: "\"Gmail\" is not defined.",
   GMAIL_OPERATION_NOT_ALLOWED: "Gmail operation not allowed.",
 
+  // Google Calendar
+  CALENDAR_SERVICE_NOT_ENABLED: "Calendar service not enabled",
+
   // miscellaneous
   SERVER_ERROR_RETRY_LATER: "We're sorry, a server error occurred. Please wait a bit and try again.",
   AUTHORIZATION_REQUIRED: "Authorization is required to perform that action. Please run the script again to authorize it.",
@@ -511,6 +514,8 @@ NORETRY_ERRORS[NORMALIZED_ERRORS.RANGE_NOT_FOUND] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.RANGE_COORDINATES_ARE_OUTSIDE_SHEET_DIMENSIONS] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.RANGE_COORDINATES_INVALID] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME] = true;
+
+NORETRY_ERRORS[NORMALIZED_ERRORS.CALENDAR_SERVICE_NOT_ENABLED] = true;
 
 NORETRY_ERRORS[NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.INVALID_ARGUMENT] = true;
@@ -808,6 +813,9 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // "There are too many LockService operations against the same script." - eg: Lock.tryLock()
   "There are too many LockService operations against the same script.": { ref: NORMALIZED_ERRORS.TOO_MANY_LOCK_OPERATIONS, locale: 'en'},
   "Có quá nhiều thao tác LockService trên cùng một tập lệnh.": { ref: NORMALIZED_ERRORS.TOO_MANY_LOCK_OPERATIONS, locale: 'vi'},
+
+  // "The Google Calendar is not enabled for the user." - eg: CalendarApp.getDefaultCalendar()
+  "The Google Calendar is not enabled for the user.": { ref: NORMALIZED_ERRORS.CALENDAR_SERVICE_NOT_ENABLED, locale: 'en'},
 };
 
 /**
@@ -900,8 +908,8 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME,
     locale: 'en'},
 
-  // User Rate Limit Exceeded. Rate of requests for user exceed configured project quota. 
-  // You may consider re-evaluating expected per-user traffic to the API and adjust project quota limits accordingly. 
+  // User Rate Limit Exceeded. Rate of requests for user exceed configured project quota.
+  // You may consider re-evaluating expected per-user traffic to the API and adjust project quota limits accordingly.
   // You may monitor aggregate quota usage and adjust limits in the API Console: https://console.developers.google.com/XXX
   {regex: /User Rate Limit Exceeded\. Rate of requests for user exceed configured project quota\./,
     ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED,
