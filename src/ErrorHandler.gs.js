@@ -482,6 +482,7 @@ NORMALIZED_ERRORS = {
   INVALID_EMAIL: 'Invalid email',
   DOCUMENT_MISSING: 'Document is missing (perhaps it was deleted?)',
   USER_RATE_LIMIT_EXCEEDED_RETRY_AFTER_SPECIFIED_TIME: 'User-rate limit exceeded. Retry after specified time.',
+  DAILY_LIMIT_EXCEEDED: "Daily Limit Exceeded",
   SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY: "Service invoked too many times for one day.",
   SERVICE_UNAVAILABLE: "Service unavailable",
   SERVICE_ERROR: "Service error",
@@ -520,7 +521,7 @@ NORETRY_ERRORS[NORMALIZED_ERRORS.CALENDAR_SERVICE_NOT_ENABLED] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.INVALID_ARGUMENT] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.ACTION_NOT_ALLOWED_THROUGH_EXEC_API] = true;
-
+NORETRY_ERRORS[NORMALIZED_ERRORS.DAILY_LIMIT_EXCEEDED] = true;
 
 // noinspection JSUnusedGlobalSymbols, ThisExpressionReferencesGlobalObjectJS
 this['ErrorHandler'] = {
@@ -913,6 +914,12 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
   // You may monitor aggregate quota usage and adjust limits in the API Console: https://console.developers.google.com/XXX
   {regex: /User Rate Limit Exceeded\. Rate of requests for user exceed configured project quota\./,
     ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED,
+    locale: 'en'},
+  
+  // Daily Limit Exceeded. The quota will be reset at midnight Pacific Time (PT). 
+  // You may monitor your quota usage and adjust limits in the API Console: https://console.developers.google.com/XXX
+  {regex: /Daily Limit Exceeded\. The quota will be reset at midnight Pacific Time/,
+    ref: NORMALIZED_ERRORS.DAILY_LIMIT_EXCEEDED,
     locale: 'en'},
 
   // Service invoked too many times for one day: XXX. (XXX: urlFetch, email)
