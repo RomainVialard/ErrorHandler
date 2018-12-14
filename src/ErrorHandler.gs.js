@@ -444,6 +444,7 @@ NORMALIZED_ERRORS = {
   // Google Drive
   NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND: "No item with the given ID could be found, or you do not have permission to access it.",
   NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT: "You do not have permissions to access the requested document.",
+  LIMIT_EXCEEDED_DRIVEAPP: "Limit Exceeded: DriveApp.",
 
   // Gmail / email service
   MAIL_SERVICE_NOT_ENABLED: "Mail service not enabled",
@@ -765,6 +766,10 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Non disponi dell'autorizzazione necessaria per accedere al documento richiesto.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'it'},
   "No cuenta con los permisos necesarios para acceder al documento solicitado.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'es_CO'},
 
+  // "Limit Exceeded: DriveApp."
+  "Limit Exceeded: DriveApp.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_DRIVEAPP, locale: 'en'},
+  "Límite Excedido: DriveApp.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_DRIVEAPP, locale: 'es_419'},
+  
   // "Unable to talk to trigger service"
   "Unable to talk to trigger service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'en'},
   "Impossible de communiquer pour déclencher le service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'fr'},
@@ -785,6 +790,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
 
   // "Gmail operation not allowed." - eg: Gmail App.sendEmail()
   "Gmail operation not allowed.": { ref: NORMALIZED_ERRORS.GMAIL_OPERATION_NOT_ALLOWED, locale: 'en'},
+  "Gmail operation not allowed. ": { ref: NORMALIZED_ERRORS.GMAIL_OPERATION_NOT_ALLOWED, locale: 'en'},
 
   // "Invalid thread_id value"
   "Invalid thread_id value": { ref: NORMALIZED_ERRORS.INVALID_THREAD_ID_VALUE, locale: 'en'},
