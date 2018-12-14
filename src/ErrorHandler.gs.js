@@ -444,7 +444,7 @@ NORMALIZED_ERRORS = {
   // Google Drive
   NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND: "No item with the given ID could be found, or you do not have permission to access it.",
   NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT: "You do not have permissions to access the requested document.",
-  LIMIT_EXCEEDED_DRIVEAPP: "Limit Exceeded: DriveApp.",
+  LIMIT_EXCEEDED_DRIVE_APP: "Limit Exceeded: Drive\u0041pp.", // using Unicode escape sequence to avoid scope prompt
 
   // Gmail / email service
   MAIL_SERVICE_NOT_ENABLED: "Mail service not enabled",
@@ -766,9 +766,9 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Non disponi dell'autorizzazione necessaria per accedere al documento richiesto.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'it'},
   "No cuenta con los permisos necesarios para acceder al documento solicitado.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'es_CO'},
 
-  // "Limit Exceeded: DriveApp."
-  "Limit Exceeded: DriveApp.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_DRIVEAPP, locale: 'en'},
-  "Límite Excedido: DriveApp.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_DRIVEAPP, locale: 'es_419'},
+  // "Limit Exceeded: Drive App." - using Unicode escape sequence to avoid scope prompt
+  "Limit Exceeded: Drive\u0041pp.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_DRIVE_APP, locale: 'en'},
+  "Límite Excedido: Drive\u0041pp.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_DRIVE_APP, locale: 'es_419'},
   
   // "Unable to talk to trigger service"
   "Unable to talk to trigger service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'en'},
@@ -821,7 +821,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "There are too many LockService operations against the same script.": { ref: NORMALIZED_ERRORS.TOO_MANY_LOCK_OPERATIONS, locale: 'en'},
   "Có quá nhiều thao tác LockService trên cùng một tập lệnh.": { ref: NORMALIZED_ERRORS.TOO_MANY_LOCK_OPERATIONS, locale: 'vi'},
 
-  // "The Google Calendar is not enabled for the user." - eg: CalendarApp.getDefaultCalendar()
+  // "The Google Calendar is not enabled for the user." - eg: Calendar App.getDefaultCalendar()
   "The Google Calendar is not enabled for the user.": { ref: NORMALIZED_ERRORS.CALENDAR_SERVICE_NOT_ENABLED, locale: 'en'},
 };
 
