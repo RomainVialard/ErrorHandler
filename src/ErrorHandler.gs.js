@@ -489,6 +489,7 @@ NORMALIZED_ERRORS = {
   SERVICE_ERROR: "Service error",
   INVALID_ARGUMENT: 'Invalid argument',
   SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME: 'A sheet with this name already exists. Please enter another name.',
+  API_NOT_ENABLED: 'Project is not found and cannot be used for API calls',
 };
 
 /**
@@ -523,6 +524,7 @@ NORETRY_ERRORS[NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.INVALID_ARGUMENT] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.ACTION_NOT_ALLOWED_THROUGH_EXEC_API] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.DAILY_LIMIT_EXCEEDED] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.API_NOT_ENABLED] = true;
 
 // noinspection JSUnusedGlobalSymbols, ThisExpressionReferencesGlobalObjectJS
 this['ErrorHandler'] = {
@@ -823,6 +825,9 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
 
   // "The Google Calendar is not enabled for the user." - eg: CalendarApp.getDefaultCalendar()
   "The Google Calendar is not enabled for the user.": { ref: NORMALIZED_ERRORS.CALENDAR_SERVICE_NOT_ENABLED, locale: 'en'},
+
+  // If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.
+  "If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.": { ref: NORMALIZED_ERRORS.API_NOT_ENABLED, locale: 'en'}
 };
 
 /**
@@ -1037,6 +1042,10 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['sheetName'],
     ref: NORMALIZED_ERRORS.SHEET_ALREADY_EXISTS_PLEASE_ENTER_ANOTHER_NAME,
     locale: 'sk'},
+  {regex: /^Project ([0-9]+) is not found and cannot be used for API calls\. If it is recently created, enable (.*) by visiting (.*) then retry\. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry\.$/,
+    variables: ['projectId', 'apiName', 'consoleUrl'],
+    ref: NORMALIZED_ERRORS.API_NOT_ENABLED,
+    locale: 'en'},
 ];
 
 /**
