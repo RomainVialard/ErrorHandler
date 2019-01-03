@@ -826,8 +826,8 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // "The Google Calendar is not enabled for the user." - eg: CalendarApp.getDefaultCalendar()
   "The Google Calendar is not enabled for the user.": { ref: NORMALIZED_ERRORS.CALENDAR_SERVICE_NOT_ENABLED, locale: 'en'},
 
-  // If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.
-  "If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.": { ref: NORMALIZED_ERRORS.API_NOT_ENABLED, locale: 'en'}
+  // Google Project not found. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.
+  "Google Project not found. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.": { ref: NORMALIZED_ERRORS.API_NOT_ENABLED, locale: 'en'}
 };
 
 /**
