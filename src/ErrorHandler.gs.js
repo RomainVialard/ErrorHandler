@@ -111,7 +111,7 @@ function expBackoff(func, options) {
 
 
     // Process error retry
-    if (!isUrlFetchResponse && error.message) {
+    if (!isUrlFetchResponse && error && error.message) {
       var variables = [];
       var normalizedError = ErrorHandler.getNormalizedError(error.message, variables);
 
@@ -336,6 +336,7 @@ function logError(error, additionalParams, options) {
   var customError = new Error(normalizedMessage || error.message);
   customError.context = log.context;
 
+  // noinspection JSValidateTypes
   return customError;
 }
 
@@ -368,7 +369,7 @@ function getNormalizedError(localizedErrorMessage, partialMatches) {
    */
   var matcher;
 
-  for (var i = 0; matcher = ErrorHandler_._ERROR_PARTIAL_MATCH[i]; i++) {
+  for (var i = 0; (matcher = ErrorHandler_._ERROR_PARTIAL_MATCH[i]); i++) {
     // search for a match
     match = localizedErrorMessage.match(matcher.regex);
     if (match) break;
@@ -379,7 +380,7 @@ function getNormalizedError(localizedErrorMessage, partialMatches) {
 
   // Extract partial match variables
   if (matcher.variables && partialMatches && Array.isArray(partialMatches)) {
-    for (var index = 0, variable; variable = matcher.variables[index]; index++) {
+    for (var index = 0, variable; (variable = matcher.variables[index]); index++) {
       partialMatches.push({
         variable: variable, value: match[index + 1] !== undefined && match[index + 1] || ''
       });
@@ -413,7 +414,7 @@ function getErrorLocale(localizedErrorMessage) {
    */
   var matcher;
 
-  for (var i = 0; matcher = ErrorHandler_._ERROR_PARTIAL_MATCH[i]; i++) {
+  for (var i = 0; (matcher = ErrorHandler_._ERROR_PARTIAL_MATCH[i]); i++) {
     // search for a match
     match = localizedErrorMessage.match(matcher.regex);
     if (match) break;
@@ -566,7 +567,7 @@ ErrorHandler_._convertErrorStack = function (stack, addonName) {
   var res;
   var regex = new RegExp('at\\s([^:]+?)'+ (addonName ? '(?:\\s\\('+ addonName +'\\))?' : '') +':(\\d+)(?:\\s\\(([^)]+)\\))?', 'gm');
 
-  while (res = regex.exec(stack)) {
+  while ((res = regex.exec(stack))) {
     var [/* total match */, fileName, lineNumber, functionName] = res;
 
     if (!lastFunctionName) lastFunctionName = functionName || '';
@@ -922,7 +923,7 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED,
     locale: 'en'},
   
-  // Daily Limit Exceeded. The quota will be reset at midnight Pacific Time (PT). 
+  // Daily Limit Exceeded. The quota will be reset at midnight Pacific Time (PT).
   // You may monitor your quota usage and adjust limits in the API Console: https://console.developers.google.com/XXX
   {regex: /Daily Limit Exceeded\. The quota will be reset at midnight Pacific Time/,
     ref: NORMALIZED_ERRORS.DAILY_LIMIT_EXCEEDED,
@@ -1056,4 +1057,4 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
 
 
 //</editor-fold>
-  
+
