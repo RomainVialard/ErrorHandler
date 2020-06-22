@@ -468,6 +468,7 @@ NORMALIZED_ERRORS = {
   // miscellaneous
   SERVER_ERROR_RETRY_LATER: "We're sorry, a server error occurred. Please wait a bit and try again.",
   AUTHORIZATION_REQUIRED: "Authorization is required to perform that action. Please run the script again to authorize it.",
+  SERVER_ERROR_PERMISSION_DENIED: "We're sorry, a server error occurred while reading from storage. Error code PERMISSION_DENIED.",
   EMPTY_RESPONSE: "Empty response",
   BAD_VALUE: "Bad value",
   LIMIT_EXCEEDED: "Limit Exceeded: .",
@@ -649,8 +650,12 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // "Authorization is required to perform that action. Please run the script again to authorize it."
   "Authorization is required to perform that action. Please run the script again to authorize it.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'en'},
   "Autorisation requise pour exécuter cette action. Exécutez à nouveau le script pour autoriser cette action.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'fr'},
+  "Vous devez disposer des autorisations requises pour pouvoir effectuer cette action.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'fr'},
   "Cần được cho phép để thực hiện tác vụ đó. Hãy chạy lại tập lệnh để cho phép tác vụ.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'vi'},
   "É necessária autorização para executar esta ação. Execute o script novamente para autorizar a ação.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'pt'},
+
+  // "We're sorry, a server error occurred while reading from storage. Error code PERMISSION_DENIED."
+  "We're sorry, a server error occurred while reading from storage. Error code PERMISSION_DENIED.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_PERMISSION_DENIED, locale: 'en'}, 
 
   // "Empty response"
   "Empty response": { ref: NORMALIZED_ERRORS.EMPTY_RESPONSE, locale: 'en'},
@@ -1057,4 +1062,3 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
 
 
 //</editor-fold>
-
