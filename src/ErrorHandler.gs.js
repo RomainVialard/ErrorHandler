@@ -289,7 +289,7 @@ function logError(error, additionalParams, options) {
   // noinspection JSUnresolvedVariable
   var addonName = additionalParams && additionalParams.addonName || ErrorHandler_._this['SCRIPT_PROJECT_TITLE'] || '';
 
-  // Manage error Stack
+  // Manage error Stack - only compatible with DEPRECATED_ES5 runtime
   if (error.lineNumber && error.fileName && error.stack) {
     var fileName = addonName && error.fileName.replace(' ('+ addonName +')', '') || error.fileName;
 
@@ -302,6 +302,11 @@ function logError(error, additionalParams, options) {
     var res = ErrorHandler_._convertErrorStack(error.stack, addonName);
     log.context.reportLocation.functionName = res.lastFunctionName;
     log.message+= '\n    '+ res.stack;
+  }
+  else if (error.stack) {
+    // In the V8 runtime, the JavaScript Error object doesn't support fileName or lineNumber
+    // https://developers.google.com/apps-script/guides/v8-runtime/migration#avoid_using_errorfilename_and_errorlinenumber
+    log.message+= '\n    '+ error.stack;
   }
 
   if (error.responseCode) {
@@ -480,6 +485,7 @@ NORMALIZED_ERRORS = {
   UNABLE_TO_TALK_TO_TRIGGER_SERVICE: "Unable to talk to trigger service",
   ACTION_NOT_ALLOWED_THROUGH_EXEC_API: "Script has attempted to perform an action that is not allowed when invoked through the Google Apps Script Execution API.",
   TOO_MANY_LOCK_OPERATIONS: "There are too many LockService operations against the same script.",
+  TOO_MANY_TRIGGERS_FOR_THIS_USER_ON_THE_PROJECT: 'This script has too many triggers. Triggers must be deleted from the script before more can be added.',
 
   // Partial match error
   INVALID_EMAIL: 'Invalid email',
@@ -650,10 +656,19 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // "Authorization is required to perform that action. Please run the script again to authorize it."
   "Authorization is required to perform that action. Please run the script again to authorize it.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'en'},
   "Autorisation requise pour exécuter cette action. Exécutez à nouveau le script pour autoriser cette action.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'fr'},
-  "Vous devez disposer des autorisations requises pour pouvoir effectuer cette action.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'fr'},
   "Cần được cho phép để thực hiện tác vụ đó. Hãy chạy lại tập lệnh để cho phép tác vụ.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'vi'},
   "É necessária autorização para executar esta ação. Execute o script novamente para autorizar a ação.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'pt'},
 
+  // "Authorization is required to perform that action." >> Multiple-account issue / V8 - default to NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED
+  "Authorisation is required to perform that action.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'en-GB'},
+  "Authorization is required to perform that action.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'en-US'},
+  "Vous devez disposer des autorisations requises pour pouvoir effectuer cette action.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'fr'},
+  "Se necesita autorización para realizar esta acción." : { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'es'},
+  "Cần được cho phép để thực hiện hành động đó." : { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'vi'},
+  "É necessária autorização para efetuar esta ação." : { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'pt'},
+  "Per eseguire questa azione è richiesta l'autorizzazione." : { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'it'},
+  "Godkännande krävs för att utföra denna åtgärd." : { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'sv'},
+  
   // "We're sorry, a server error occurred while reading from storage. Error code PERMISSION_DENIED."
   "We're sorry, a server error occurred while reading from storage. Error code PERMISSION_DENIED.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_PERMISSION_DENIED, locale: 'en'}, 
 
@@ -829,6 +844,9 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
 
   // "The Google Calendar is not enabled for the user." - eg: Calendar App.getDefaultCalendar()
   "The Google Calendar is not enabled for the user.": { ref: NORMALIZED_ERRORS.CALENDAR_SERVICE_NOT_ENABLED, locale: 'en'},
+  
+  //User Triggers limit on a project reached
+  'This script has too many triggers. Triggers must be deleted from the script before more can be added.': { ref: NORMALIZED_ERRORS.TOO_MANY_TRIGGERS_FOR_THIS_USER_ON_THE_PROJECT, locale: 'en'}
 };
 
 /**
@@ -947,6 +965,10 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['service'],
     ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
     locale: 'es'},
+  {regex: /^Servicio solicitado demasiadas veces para un mismo día: ([^.]*)\.$/,
+    variables: ['service'],
+    ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
+    locale: 'es'},  
   {regex: /^Serviço chamado muitas vezes no mesmo dia: ([^.]*)\.$/,
     variables: ['service'],
     ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
