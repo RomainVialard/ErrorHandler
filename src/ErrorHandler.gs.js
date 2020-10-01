@@ -786,6 +786,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Vous n'avez pas l'autorisation d'accéder au document demandé.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'fr'},
   "Non disponi dell'autorizzazione necessaria per accedere al documento richiesto.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'it'},
   "No cuenta con los permisos necesarios para acceder al documento solicitado.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'es_CO'},
+  "No tienes permiso para acceder al documento solicitado.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'es'},
 
   // "Limit Exceeded: Drive App." - using Unicode escape sequence to avoid scope prompt
   "Limit Exceeded: Drive\u0041pp.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_DRIVE_APP, locale: 'en'},
@@ -821,6 +822,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
 
   // "Label name exists or conflicts"
   "Label name exists or conflicts": { ref: NORMALIZED_ERRORS.LABEL_NAME_EXISTS_OR_CONFLICTS, locale: 'en'},
+  "Operation on Gmail Aborted. : Label name exists or conflicts": { ref: NORMALIZED_ERRORS.LABEL_NAME_EXISTS_OR_CONFLICTS, locale: 'en'},
 
   // "Invalid label name"
   "Invalid label name": { ref: NORMALIZED_ERRORS.INVALID_LABEL_NAME, locale: 'en'},
@@ -881,6 +883,10 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
 
   // Document XXX is missing (perhaps it was deleted?) - eg: Spreadsheet App.openById()
   {regex: /^Document (\S*) is missing \(perhaps it was deleted\?\)$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
+    locale: 'en'},
+  {regex: /^Document (\S*) is missing \(perhaps it was deleted, or you don\\'t have read access\?\)$/,
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
     locale: 'en'},
@@ -977,7 +983,11 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['service'],
     ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
     locale: 'vi'},
-
+  {regex: /^Layanan terlalu sering diminta di hari yang sama: ([^.]*)\.$/,
+    variables: ['service'],
+    ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
+    locale: 'id'},
+  
   // Service unavailable: XXX (XXX: Docs)
   {regex: /^Service unavailable: (.*)$/,
     variables: ['service'],
