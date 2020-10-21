@@ -472,6 +472,7 @@ NORMALIZED_ERRORS = {
 
   // miscellaneous
   SERVER_ERROR_RETRY_LATER: "We're sorry, a server error occurred. Please wait a bit and try again.",
+  SERVER_ERROR_DEADLINE_EXCEEDED: "We're sorry, a server error occurred: DEADLINE_EXCEEDED",
   AUTHORIZATION_REQUIRED: "Authorization is required to perform that action. Please run the script again to authorize it.",
   SERVER_ERROR_PERMISSION_DENIED: "We're sorry, a server error occurred while reading from storage. Error code PERMISSION_DENIED.",
   EMPTY_RESPONSE: "Empty response",
@@ -593,6 +594,7 @@ ErrorHandler_._convertErrorStack = function (stack, addonName) {
 /**
  * Map all different error translation to their english counterpart,
  * Thanks to Google AppsScript throwing localized errors, it's impossible to easily catch them and actually do something to fix it for our users.
+ * ISO-639-1 Codes: https://cloud.google.com/translate/docs/languages
  *
  * @type {Object<ErrorHandler_.ErrorMatcher>}
  */
@@ -653,6 +655,14 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "A apărut o eroare de server. Așteptați puțin și încercați din nou.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'ro'},
   "Ein Serverfehler ist aufgetreten. Bitte versuchen Sie es später erneut.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_RETRY_LATER, locale: 'de'},
 
+  // "We're sorry, a server error occurred: DEADLINE_EXCEEDED"
+  "We're sorry, a server error occurred: DEADLINE_EXCEEDED": { ref: NORMALIZED_ERRORS.SERVER_ERROR_DEADLINE_EXCEEDED, locale: 'en'},
+  "Se ha producido un error en el servidor: DEADLINE_EXCEEDED.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_DEADLINE_EXCEEDED, locale: 'es'},
+  "Une erreur s'est produite sur le serveur : DEADLINE_EXCEEDED": { ref: NORMALIZED_ERRORS.SERVER_ERROR_DEADLINE_EXCEEDED, locale: 'fr'},
+  "Xin lỗi bạn, máy chủ đã gặp lỗi: DEADLINE_EXCEEDED": { ref: NORMALIZED_ERRORS.SERVER_ERROR_DEADLINE_EXCEEDED, locale: 'vi'},
+  "Maaf, terjadi kesalahan pada server: DEADLINE_EXCEEDED": { ref: NORMALIZED_ERRORS.SERVER_ERROR_DEADLINE_EXCEEDED, locale: 'id'},
+  "Onze excuses. Er is een serverfout opgetreden: DEADLINE_EXCEEDED": { ref: NORMALIZED_ERRORS.SERVER_ERROR_DEADLINE_EXCEEDED, locale: 'nl'},
+  
   // "Authorization is required to perform that action. Please run the script again to authorize it."
   "Authorization is required to perform that action. Please run the script again to authorize it.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'en'},
   "Autorisation requise pour exécuter cette action. Exécutez à nouveau le script pour autoriser cette action.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'fr'},
@@ -713,6 +723,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Argument too large: subject": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_SUBJECT_LENGTH, locale: 'en'},
   "Argument trop grand : subject": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_SUBJECT_LENGTH, locale: 'fr'},
   "Argumento demasiado grande: subject": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_SUBJECT_LENGTH, locale: 'es'},
+  "Argumen terlalu besar: subject": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_EMAIL_SUBJECT_LENGTH, locale: 'id'},
 
   // "User Rate Limit Exceeded" - eg: Gmail.Users.Threads.get
   "User Rate Limit Exceeded": { ref: NORMALIZED_ERRORS.USER_RATE_LIMIT_EXCEEDED, locale: 'en'},
@@ -727,6 +738,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Not found": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'en'},
   "Não encontrado": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'pt_PT'},
   "No se ha encontrado.": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'es'},
+  "Non trovato": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'it'},
 
   // "Bad Request" - eg: all 'list' requests from Gmail advanced service, maybe if there are 0 messages in Gmail (new account)
   "Bad Request": { ref: NORMALIZED_ERRORS.BAD_REQUEST, locale: 'en'},
@@ -782,6 +794,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // "You do not have permissions to access the requested document."
   "You do not have permissions to access the requested document.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'en'},
   "Bạn không có quyền truy cập tài liệu yêu cầu.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'vi'},
+  "Bạn không có quyền truy cập vào tài liệu yêu cầu.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'vi'},
   "No dispones del permiso necesario para acceder al documento solicitado.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'es'},
   "Vous n'avez pas l'autorisation d'accéder au document demandé.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'fr'},
   "Non disponi dell'autorizzazione necessaria per accedere al documento richiesto.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'it'},
@@ -813,6 +826,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // "Gmail operation not allowed." - eg: Gmail App.sendEmail()
   "Gmail operation not allowed.": { ref: NORMALIZED_ERRORS.GMAIL_OPERATION_NOT_ALLOWED, locale: 'en'},
   "Gmail operation not allowed. ": { ref: NORMALIZED_ERRORS.GMAIL_OPERATION_NOT_ALLOWED, locale: 'en'},
+  "No se admite la operación de Gmail.": { ref: NORMALIZED_ERRORS.GMAIL_OPERATION_NOT_ALLOWED, locale: 'es'},
 
   // "Invalid thread_id value"
   "Invalid thread_id value": { ref: NORMALIZED_ERRORS.INVALID_THREAD_ID_VALUE, locale: 'en'},
@@ -987,7 +1001,11 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['service'],
     ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
     locale: 'id'},
-  
+  {regex: /^Service is te vaak aangeroepen voor één dag: ([^.]*)\.$/,
+    variables: ['service'],
+    ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
+    locale: 'nl'},
+    
   // Service unavailable: XXX (XXX: Docs)
   {regex: /^Service unavailable: (.*)$/,
     variables: ['service'],
