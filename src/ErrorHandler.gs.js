@@ -188,18 +188,19 @@ function expBackoff(func, options) {
  * Helper function to automatically handles exponential backoff on UrlFetch use
  *
  * @param {string} url
- * @param {Object} params
+ * @param {Object} [params]
+ * @param {{}} [options] - options for exponential backoff - see expBackoff() function
  *
  * @return {UrlFetchApp.HTTPResponse}  - fetch response
  */
-function urlFetchWithExpBackOff(url, params) {
+function urlFetchWithExpBackOff(url, params, expBackoffOptions) {
   params = params || {};
 
   params.muteHttpExceptions = true;
 
   return ErrorHandler.expBackoff(function(){
     return UrlFetchApp.fetch(url, params);
-  });
+  }, expBackoffOptions);
 }
 
 /**
@@ -443,6 +444,7 @@ NORMALIZED_ERRORS = {
   // Google Sheets
   CONDITIONNAL_RULE_REFERENCE_DIF_SHEET: "Conditional format rule cannot reference a different sheet.",
   TRYING_TO_EDIT_PROTECTED_CELL: "You are trying to edit a protected cell or object. Please contact the spreadsheet owner to remove protection if you need to edit.",
+  SHEET_NOT_FOUND: "Sheet not found",
   RANGE_NOT_FOUND: "Range not found",
   RANGE_COORDINATES_ARE_OUTSIDE_SHEET_DIMENSIONS: "The coordinates of the range are outside the dimensions of the sheet.",
   RANGE_COORDINATES_INVALID: "The coordinates or dimensions of the range are invalid.",
@@ -521,6 +523,7 @@ NORETRY_ERRORS[NORMALIZED_ERRORS.LABEL_NAME_EXISTS_OR_CONFLICTS] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.SHEET_NOT_FOUND] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.RANGE_NOT_FOUND] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.RANGE_COORDINATES_ARE_OUTSIDE_SHEET_DIMENSIONS] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.RANGE_COORDINATES_INVALID] = true;
@@ -739,6 +742,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Não encontrado": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'pt_PT'},
   "No se ha encontrado.": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'es'},
   "Non trovato": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'it'},
+  "Introuvable": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'fr'},
 
   // "Bad Request" - eg: all 'list' requests from Gmail advanced service, maybe if there are 0 messages in Gmail (new account)
   "Bad Request": { ref: NORMALIZED_ERRORS.BAD_REQUEST, locale: 'en'},
@@ -756,6 +760,9 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Você está tentando editar uma célula ou um objeto protegido. Se precisar editar, entre em contato com o proprietário da planilha para remover a proteção.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'pt'},
   "Покушавате да измените заштићену ћелију или објекат. Контактирајте власника табеле да уклони заштиту ако треба да унесете измене.": { ref: NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL, locale: 'sr'},
 
+  // "Sheet not found"
+  "Sheet not found": { ref: NORMALIZED_ERRORS.SHEET_NOT_FOUND, locale: 'en'},
+  
   // "Range not found" - eg: Range.getValue()
   "Range not found": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'en'},
   "Range  not found": { ref: NORMALIZED_ERRORS.RANGE_NOT_FOUND, locale: 'en_GB'},
@@ -793,10 +800,12 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
 
   // "You do not have permissions to access the requested document."
   "You do not have permissions to access the requested document.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'en'},
+  "You do not have permission to access the requested document.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'en'},
   "Bạn không có quyền truy cập tài liệu yêu cầu.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'vi'},
   "Bạn không có quyền truy cập vào tài liệu yêu cầu.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'vi'},
   "No dispones del permiso necesario para acceder al documento solicitado.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'es'},
   "Vous n'avez pas l'autorisation d'accéder au document demandé.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'fr'},
+  "Vous n'êtes pas autorisé à accéder au document demandé.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'fr'},
   "Non disponi dell'autorizzazione necessaria per accedere al documento richiesto.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'it'},
   "No cuenta con los permisos necesarios para acceder al documento solicitado.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'es_CO'},
   "No tienes permiso para acceder al documento solicitado.": { ref: NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT, locale: 'es'},
@@ -827,6 +836,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Gmail operation not allowed.": { ref: NORMALIZED_ERRORS.GMAIL_OPERATION_NOT_ALLOWED, locale: 'en'},
   "Gmail operation not allowed. ": { ref: NORMALIZED_ERRORS.GMAIL_OPERATION_NOT_ALLOWED, locale: 'en'},
   "No se admite la operación de Gmail.": { ref: NORMALIZED_ERRORS.GMAIL_OPERATION_NOT_ALLOWED, locale: 'es'},
+  "Opération non autorisée dans Gmail.": { ref: NORMALIZED_ERRORS.GMAIL_OPERATION_NOT_ALLOWED, locale: 'fr'},
 
   // "Invalid thread_id value"
   "Invalid thread_id value": { ref: NORMALIZED_ERRORS.INVALID_THREAD_ID_VALUE, locale: 'en'},
@@ -837,6 +847,7 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // "Label name exists or conflicts"
   "Label name exists or conflicts": { ref: NORMALIZED_ERRORS.LABEL_NAME_EXISTS_OR_CONFLICTS, locale: 'en'},
   "Operation on Gmail Aborted. : Label name exists or conflicts": { ref: NORMALIZED_ERRORS.LABEL_NAME_EXISTS_OR_CONFLICTS, locale: 'en'},
+  "L'opération sur Gmail a été annulée. : Label name exists or conflicts": { ref: NORMALIZED_ERRORS.LABEL_NAME_EXISTS_OR_CONFLICTS, locale: 'fr'},
 
   // "Invalid label name"
   "Invalid label name": { ref: NORMALIZED_ERRORS.INVALID_LABEL_NAME, locale: 'en'},
@@ -900,7 +911,12 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
     locale: 'en'},
+  // not sure if escaping the backslash is needed
   {regex: /^Document (\S*) is missing \(perhaps it was deleted, or you don\\'t have read access\?\)$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
+    locale: 'en'},  
+  {regex: /^Document (\S*) is missing \(perhaps it was deleted, or you don't have read access\?\)$/,
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
     locale: 'en'},
