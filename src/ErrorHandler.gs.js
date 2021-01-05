@@ -339,7 +339,7 @@ function logError(error, additionalParams, options) {
 
   // Return an error, with context
   var customError = new Error(normalizedMessage || error.message);
-  Object.assign(customError, {context: log.context});
+  Object.assign(customError, { context: log.context });
 
   return customError;
 }
@@ -451,6 +451,8 @@ var NORMALIZED_ERRORS = {
   NO_ITEM_WITH_GIVEN_ID_COULD_BE_FOUND: "No item with the given ID could be found, or you do not have permission to access it.",
   NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT: "You do not have permissions to access the requested document.",
   LIMIT_EXCEEDED_DRIVE_APP: "Limit Exceeded: Drive\u0041pp.", // using Unicode escape sequence to avoid scope prompt
+  LIMIT_EXCEEDED_DRIVE: "Limit Exceeded: Drive.",
+  ACTION_REQUIRES_SHARED_DRIVE_MEMBERSHIP: "API call to drive.files.list failed with error: The attempted action requires shared drive membership.",
 
   // Gmail / email service
   MAIL_SERVICE_NOT_ENABLED: "Mail service not enabled",
@@ -519,6 +521,8 @@ NORETRY_ERRORS[NORMALIZED_ERRORS.IMAP_FEATURES_DISABLED_BY_ADMIN] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.LABEL_NAME_EXISTS_OR_CONFLICTS] = true;
 
 NORETRY_ERRORS[NORMALIZED_ERRORS.NO_PERMISSION_TO_ACCESS_THE_REQUESTED_DOCUMENT] = true;
+NORETRY_ERRORS[NORMALIZED_ERRORS.ACTION_REQUIRES_SHARED_DRIVE_MEMBERSHIP] = true;
+
 NORETRY_ERRORS[NORMALIZED_ERRORS.CONDITIONNAL_RULE_REFERENCE_DIF_SHEET] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.TRYING_TO_EDIT_PROTECTED_CELL] = true;
 NORETRY_ERRORS[NORMALIZED_ERRORS.SHEET_NOT_FOUND] = true;
@@ -821,6 +825,10 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // "Limit Exceeded: Drive App." - using Unicode escape sequence to avoid scope prompt
   "Limit Exceeded: Drive\u0041pp.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_DRIVE_APP, locale: 'en' },
   "Límite Excedido: Drive\u0041pp.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_DRIVE_APP, locale: 'es_419' },
+
+  // "Limit Exceeded: Drive."
+  "Limit Exceeded: Drive.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_DRIVE, locale: 'en' },
+  "Límite Excedido: Drive.": { ref: NORMALIZED_ERRORS.LIMIT_EXCEEDED_DRIVE, locale: 'es_419' },
 
   // "Unable to talk to trigger service"
   "Unable to talk to trigger service": { ref: NORMALIZED_ERRORS.UNABLE_TO_TALK_TO_TRIGGER_SERVICE, locale: 'en' },
