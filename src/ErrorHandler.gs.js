@@ -468,6 +468,7 @@ var NORMALIZED_ERRORS = {
   LIMIT_EXCEEDED_EMAIL_SUBJECT_LENGTH: "Argument too large: subject",
   GMAIL_NOT_DEFINED: "\"Gmail\" is not defined.",
   GMAIL_OPERATION_NOT_ALLOWED: "Gmail operation not allowed.",
+  PRECONDITION_CHECK_FAILED: "Precondition check failed.",
 
   // Google Calendar
   CALENDAR_SERVICE_NOT_ENABLED: "Calendar service not enabled",
@@ -489,6 +490,7 @@ var NORMALIZED_ERRORS = {
   ACTION_NOT_ALLOWED_THROUGH_EXEC_API: "Script has attempted to perform an action that is not allowed when invoked through the Google Apps Script Execution API.",
   TOO_MANY_LOCK_OPERATIONS: "There are too many LockService operations against the same script.",
   TOO_MANY_TRIGGERS_FOR_THIS_USER_ON_THE_PROJECT: 'This script has too many triggers. Triggers must be deleted from the script before more can be added.',
+  TOO_MANY_TRIGGERS_FOR_THIS_USER_ON_THIS_DOCUMENT: 'This add-on has created too many time-based triggers in this document for this Google user account.',
 
   // Partial match error
   INVALID_EMAIL: 'Invalid email',
@@ -694,6 +696,9 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "Per eseguire questa azione è richiesta l'autorizzazione.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'it' },
   "Godkännande krävs för att utföra denna åtgärd.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'sv' },
 
+  // "API call to gmail.users.drafts.send failed with error: Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project." - default to NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED
+  "API call to gmail.users.drafts.send failed with error: Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.": { ref: NORMALIZED_ERRORS.AUTHORIZATION_REQUIRED, locale: 'en-US' },
+
   // "We're sorry, a server error occurred while reading from storage. Error code PERMISSION_DENIED."
   "We're sorry, a server error occurred while reading from storage. Error code PERMISSION_DENIED.": { ref: NORMALIZED_ERRORS.SERVER_ERROR_PERMISSION_DENIED, locale: 'en' },
 
@@ -755,6 +760,9 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "No se ha encontrado.": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'es' },
   "Non trovato": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'it' },
   "Introuvable": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'fr' },
+  "Không tìm thấy": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'vi' },
+  // happens with update() on GmailApp.GmailDraft
+  "No item with the given ID could be found. Possibly because you have not edited this item or you do not have permission to access it.": { ref: NORMALIZED_ERRORS.NOT_FOUND, locale: 'en' },
 
   // "Bad Request" - eg: all 'list' requests from Gmail advanced service, maybe if there are 0 messages in Gmail (new account)
   "Bad Request": { ref: NORMALIZED_ERRORS.BAD_REQUEST, locale: 'en' },
@@ -854,6 +862,9 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   "No se admite la operación de Gmail.": { ref: NORMALIZED_ERRORS.GMAIL_OPERATION_NOT_ALLOWED, locale: 'es' },
   "Opération non autorisée dans Gmail.": { ref: NORMALIZED_ERRORS.GMAIL_OPERATION_NOT_ALLOWED, locale: 'fr' },
 
+  // Precondition check failed
+  "API call to gmail.users.drafts.send failed with error: Precondition check failed.": { ref: NORMALIZED_ERRORS.PRECONDITION_CHECK_FAILED, locale: 'en' },
+
   // "Invalid thread_id value"
   "Invalid thread_id value": { ref: NORMALIZED_ERRORS.INVALID_THREAD_ID_VALUE, locale: 'en' },
 
@@ -888,8 +899,15 @@ ErrorHandler_._ERROR_MESSAGE_TRANSLATIONS = {
   // "The Google Calendar is not enabled for the user." - eg: Calendar App.getDefaultCalendar()
   "The Google Calendar is not enabled for the user.": { ref: NORMALIZED_ERRORS.CALENDAR_SERVICE_NOT_ENABLED, locale: 'en' },
 
-  //User Triggers limit on a project reached
-  'This script has too many triggers. Triggers must be deleted from the script before more can be added.': { ref: NORMALIZED_ERRORS.TOO_MANY_TRIGGERS_FOR_THIS_USER_ON_THE_PROJECT, locale: 'en' }
+  // User Triggers limit on a project reached
+  'This script has too many triggers. Triggers must be deleted from the script before more can be added.': { ref: NORMALIZED_ERRORS.TOO_MANY_TRIGGERS_FOR_THIS_USER_ON_THE_PROJECT, locale: 'en' },
+
+  // 'This add-on has created too many time-based triggers in this document for this Google user account.'
+  'This add-on has created too many time-based triggers in this document for this Google user account.': { ref: NORMALIZED_ERRORS.TOO_MANY_TRIGGERS_FOR_THIS_USER_ON_THIS_DOCUMENT, locale: 'en' },
+  'Este complemento ha creado demasiados activadores time-based en este documento para esta cuenta de usuario de Google.': { ref: NORMALIZED_ERRORS.TOO_MANY_TRIGGERS_FOR_THIS_USER_ON_THIS_DOCUMENT, locale: 'es' },
+  'Tiện ích bổ sung này đã tạo quá nhiều trình kích hoạt time-based trong tài liệu này cho tài khoản người dùng Google này.': { ref: NORMALIZED_ERRORS.TOO_MANY_TRIGGERS_FOR_THIS_USER_ON_THIS_DOCUMENT, locale: 'vi' },
+  'Masyadong maraming time-based trigger na ginawa ang add-on na ito sa dokumentong para sa Google user account na ito.': { ref: NORMALIZED_ERRORS.TOO_MANY_TRIGGERS_FOR_THIS_USER_ON_THIS_DOCUMENT, locale: 'fil' },
+
 };
 
 /**
@@ -973,6 +991,12 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     locale: 'es'
   },
   {
+    regex: /^Falta el documento (\S*) \(puede que se haya eliminado o que no tengas acceso de lectura\)$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
+    locale: 'es'
+  },
+  {
     regex: /^找不到文件「([^」]*)」\(可能已遭刪除\)$/,
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
@@ -986,6 +1010,12 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
   },
   {
     regex: /^Le document (\S*) est manquant \(peut-être a-t-il été supprimé \?\)$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
+    locale: 'fr'
+  },
+  {
+    regex: /^Le document (\S*) est manquant \(peut-être qu'il a été supprimé, ou que vous n'avez pas l'accès en lecture \?\)$/,
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
     locale: 'fr'
@@ -1025,6 +1055,12 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     variables: ['docId'],
     ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
     locale: 'hu'
+  },
+  {
+    regex: /^(\S*) adlı doküman bulunamıyor \(Silinmiş olabilir mi veya okuma erişiminiz mi yok\?\)$/,
+    variables: ['docId'],
+    ref: NORMALIZED_ERRORS.DOCUMENT_MISSING,
+    locale: 'tr'
   },
 
   // User-rate limit exceeded. Retry after XXX - this error can be prefixed with a translated version of 'Limit Exceeded'
@@ -1101,6 +1137,14 @@ ErrorHandler_._ERROR_PARTIAL_MATCH = [
     ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
     locale: 'nl'
   },
+  {
+    regex: /^Usługa wywołana zbyt wiele razy jednego dnia: ([^.]*)\.$/,
+    variables: ['service'],
+    ref: NORMALIZED_ERRORS.SERVICE_INVOKED_TOO_MANY_TIMES_FOR_ONE_DAY,
+    locale: 'pl'
+  },
+
+  //  premium gmail.
 
   // Service unavailable: XXX (XXX: Docs)
   {
